@@ -2,6 +2,9 @@
   "name": "kinspaX",
   "version": "1.0",
   "description": "kintone space extension",
+  "background": {
+    "scripts": ["hot-reload.js"]
+  },
   "icons": {
     "16": "images/icon-16.png",
     "48": "images/icon-48.png",
