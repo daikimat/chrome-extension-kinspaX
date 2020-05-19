@@ -10,5 +10,16 @@
     "48": "images/icon-48.png",
     "128": "images/icon-128.png"
   },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.cybozu.com/k/*",
+        "https://*.kintone.com/k/*",
+        "https://*.cybozu.cn/k/*"
+      ],
+      "css": ["content.css"],
+      "js": ["content.js"]
+    }
+  ],
   "manifest_version": 2
 }

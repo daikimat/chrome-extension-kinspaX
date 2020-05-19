@@ -1,0 +1,20 @@
+#kinspax-draggable-bar {
+    width: 8px;
+    cursor: col-resize;
+    margin-left: -4px;
+    opacity: 0;
+    background-color: #a1a1a1;
+    position: absolute;
+    z-index: 9;
+}
+
+#kinspax-draggable-bar:hover {
+    opacity: 0.3;
+}
+
+.gaia-argoui-space-spacecontent.collapsed #kinspax-draggable-bar {
+    display: none;
+}
+.gaia-argoui-space-spacecontent.collapsed.three-pane .gaia-argoui-space-spacecontent-body {
+    margin-left: 0px!important;
+}
