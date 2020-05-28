@@ -1,13 +1,18 @@
 (() => {
     'use strict';
 
-    const initialWidth = 400;
     class ThredList {
         constructor() {
+            this.changeWidtdhEventListners = []
             this.getElements();
             if (this.contentLeft !== null && this.contentBody !== null) {
                 this.ready = true;
-                this.expand(initialWidth);
+                let that = this;
+                chrome.storage.local.get(['thredListWidth'], (result) => {
+                    if (result.thredListWidth !== undefined) {
+                        that.changeWidth(result.thredListWidth);
+                    }
+                });
                 return;
             }    
             this.ready = false;
@@ -17,7 +22,7 @@
             this.threadListItemLink = document.querySelectorAll(".gaia-argoui-space-threadlist-item-link");
             this.contentBody = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body");
         }
-        expand(width) {
+        changeWidth(width) {
             // super heavy
             if (this.ready === false) {
                 return;
@@ -28,12 +33,22 @@
                 element.style.width = widthWithPx;
             });
             this.contentBody.style.marginLeft = widthWithPx;
+            chrome.storage.local.set({thredListWidth: width});
+            this.changeWidtdhEventListners.forEach(listener => {
+                listener();
+            });
+        }
+        addChangeWidthEventListener(listner) {
+            this.changeWidtdhEventListners.push(listner)
         }
     }
 
     class DraggableBar {
         constructor(threadlist) {
             this.setup(threadlist);
+            threadlist.addChangeWidthEventListener(() => {
+                this.syncXPosition();
+            })
         }
         setup(threadlist) {
             this.threadlist = threadlist;
@@ -67,7 +82,7 @@
             }
             let onMouseUp = (event) => {
                 if (event.pageX > 0) {
-                    that.threadlist.expand(event.pageX);
+                    that.threadlist.changeWidth(event.pageX);
                     that.draggableBar.style.left = event.pageX + "px";
                 }
             }
@@ -99,7 +114,7 @@
             }, 600);
         }
         syncXPosition() {
-            this.draggableBar.style.left = this.threadlist.contentLeft.style.width;
+            this.draggableBar.style.left = this.threadlist.contentBody.offsetLeft + "px";
         }
         insertBar() {
             this.threadlist.contentLeft.insertAdjacentElement('afterend', this.draggableBar);

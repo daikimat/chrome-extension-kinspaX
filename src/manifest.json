@@ -5,6 +5,9 @@
   "background": {
     "scripts": ["hot-reload.js"]
   },
+  "permissions": [
+    "storage"
+  ],
   "icons": {
     "16": "images/icon-16.png",
     "48": "images/icon-48.png",
