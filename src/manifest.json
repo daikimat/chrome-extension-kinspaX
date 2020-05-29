@@ -1,17 +1,16 @@
 {
+  "manifest_version": 2,
   "name": "kinspaX",
   "version": "1.0",
   "description": "kintone space extension",
-  "background": {
-    "scripts": ["hot-reload.js"]
-  },
-  "permissions": [
-    "storage"
-  ],
+  "homepage_url": "https://github.com/daikimat/chrome-extension-kinspaX",
   "icons": {
     "16": "images/icon-16.png",
     "48": "images/icon-48.png",
     "128": "images/icon-128.png"
+  },
+  "background": {
+    "scripts": ["hot-reload.js"]
   },
   "content_scripts": [
     {
@@ -24,5 +23,7 @@
       "js": ["content.js"]
     }
   ],
-  "manifest_version": 2
+  "permissions": [
+    "storage"
+  ]
 }
