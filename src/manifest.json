@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "kinspaX",
   "version": "1.0",
-  "description": "kintone space extension",
+  "description": "Change width of kintone space thread list to Draggable",
   "homepage_url": "https://github.com/daikimat/chrome-extension-kinspaX",
   "icons": {
     "16": "images/icon-16.png",
