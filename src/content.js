@@ -46,15 +46,15 @@
     class DraggableBar {
         constructor(threadlist) {
             this.setup(threadlist);
-            threadlist.addChangeWidthEventListener(() => {
-                this.syncXPosition();
-            })
         }
         setup(threadlist) {
-            this.threadlist = threadlist;
-            this.setupThreadlist();
             this.draggableBar = document.querySelector("#kinspax-draggable-bar");
             if (this.draggableBar === null) {
+                this.threadlist = threadlist;
+                this.setupThreadlist();    
+                this.threadlist.addChangeWidthEventListener(() => {
+                    this.syncXPosition();
+                })
                 this.draggableBar = document.createElement("div");
                 this.draggableBar.id = "kinspax-draggable-bar";
                 this.layout();
