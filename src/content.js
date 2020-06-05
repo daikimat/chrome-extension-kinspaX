@@ -3,7 +3,7 @@
 
     class ThredList {
         constructor() {
-            this.changeWidtdhEventListners = []
+            this.changeWidtdhEventListners = [];
             this.getElements();
             if (this.contentLeft !== null && this.contentBody !== null) {
                 this.ready = true;
@@ -14,7 +14,7 @@
                     }
                 });
                 return;
-            }    
+            }
             this.ready = false;
         }
         getElements() {
@@ -33,13 +33,13 @@
                 element.style.width = widthWithPx;
             });
             this.contentBody.style.marginLeft = widthWithPx;
-            chrome.storage.local.set({thredListWidth: width});
+            chrome.storage.local.set({ thredListWidth: width });
             this.changeWidtdhEventListners.forEach(listener => {
                 listener();
             });
         }
         addChangeWidthEventListener(listner) {
-            this.changeWidtdhEventListners.push(listner)
+            this.changeWidtdhEventListners.push(listner);
         }
     }
 
@@ -51,10 +51,10 @@
             this.draggableBar = document.querySelector("#kinspax-draggable-bar");
             if (this.draggableBar === null) {
                 this.threadlist = threadlist;
-                this.setupThreadlist();    
+                this.setupThreadlist();
                 this.threadlist.addChangeWidthEventListener(() => {
                     this.syncXPosition();
-                })
+                });
                 this.draggableBar = document.createElement("div");
                 this.draggableBar.id = "kinspax-draggable-bar";
                 this.layout();
@@ -79,21 +79,21 @@
                 if (event.pageX > 0) {
                     that.draggableBar.style.left = event.pageX + "px";
                 }
-            }
+            };
             let onMouseUp = (event) => {
                 if (event.pageX > 0) {
                     that.threadlist.changeWidth(event.pageX);
                     that.draggableBar.style.left = event.pageX + "px";
                 }
-            }
+            };
             that.draggableBar.ondragstart = () => {
                 return false;
             };
 
-            that.draggableBar.onmousedown = (_) => {
+            that.draggableBar.onmousedown = () => {
                 document.addEventListener('mousemove', onMouseMove);
                 that.draggableBar.onmouseup = (event) => {
-                    onMouseUp(event)
+                    onMouseUp(event);
                     document.removeEventListener('mousemove', onMouseMove);
                     that.draggableBar.onmouseup = null;
                 };
@@ -106,8 +106,8 @@
         syncHeight() {
             const intervalId = setInterval(() => {
                 let spacebody = document.querySelector(".gaia-argoui-space-spacelayout-body");
-                let computedStyleHeight = parseInt(window.getComputedStyle(spacebody).getPropertyValue("height"), 10)
-                if ( computedStyleHeight > 0 ) {
+                let computedStyleHeight = parseInt(window.getComputedStyle(spacebody).getPropertyValue("height"), 10);
+                if (computedStyleHeight > 0) {
                     this.draggableBar.style.height = computedStyleHeight + "px";
                     clearInterval(intervalId);
                 }
@@ -122,8 +122,8 @@
     }
 
     class ContentRight {
-        constructor () {
-            this.setup()
+        constructor() {
+            this.setup();
         }
         setup() {
             this.twopaneButton = document.querySelector("#kinspax-twopane-button");
@@ -138,7 +138,7 @@
                         this.toggleTwopane(true);
                     }
                 });
-    
+
             }
         }
         getElements() {
@@ -161,18 +161,18 @@
         toggleTwopane(toCollapsed) {
             if (toCollapsed === true) {
                 this.expandButton.click();
-                this.expandButton.classList.remove("is-active")
-                this.twopaneButton.classList.add("is-active")
+                this.expandButton.classList.remove("is-active");
+                this.twopaneButton.classList.add("is-active");
                 this.contentBody.style.marginRight = "0px";
                 this.contentBody.style.borderRight = "0px";
                 this.contentRight.style.display = "none";
-                chrome.storage.local.set({twopane: true});
+                chrome.storage.local.set({ twopane: true });
             } else {
-                this.twopaneButton.classList.remove("is-active")
+                this.twopaneButton.classList.remove("is-active");
                 this.contentBody.style.marginRight = null;
                 this.contentBody.style.borderRight = null;
                 this.contentRight.style.display = null;
-                chrome.storage.local.set({twopane: false});
+                chrome.storage.local.set({ twopane: false });
             }
         }
     }
@@ -196,10 +196,10 @@
                 clearInterval(intervalId);
             }
         }, 1000);
-    }
+    };
     setup();
     window.onhashchange = () => {
         setup();
-    }
+    };
 
 })();
