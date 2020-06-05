@@ -1,5 +1,5 @@
 # kinspaX
-extension for [kintone](https://kintone.cybozu.co.jp/) **Space**
+extension for [kintone](https://www.kintone.com/) **Space**
 
 ## LICENSE
 
