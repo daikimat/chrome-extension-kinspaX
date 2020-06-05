@@ -20,6 +20,10 @@
       "js": ["content.js"]
     }
   ],
+  "web_accessible_resources": [
+    "images/twopane-active.png",
+    "images/twopane.png"
+  ],
   "permissions": [
     "storage"
   ]
