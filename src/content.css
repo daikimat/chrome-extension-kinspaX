@@ -18,3 +18,19 @@
 .gaia-argoui-space-spacecontent.collapsed.three-pane .gaia-argoui-space-spacecontent-body {
     margin-left: 0px!important;
 }
+
+#kinspax-twopane-button {
+    background-color: transparent;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-image: url('chrome-extension://__MSG_@@extension_id__/images/twopane.png');
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+#kinspax-twopane-button.is-active {
+    background-image: url('chrome-extension://__MSG_@@extension_id__/images/twopane-active.png');
+}

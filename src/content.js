@@ -121,7 +121,64 @@
         }
     }
 
+    class ContentRight {
+        constructor () {
+            this.setup()
+        }
+        setup() {
+            this.twopaneButton = document.querySelector("#kinspax-twopane-button");
+            if (this.twopaneButton === null) {
+                this.getElements();
+                this.twopaneButton = document.createElement("a");
+                this.twopaneButton.id = "kinspax-twopane-button";
+                this.collapseButton.insertAdjacentElement('beforebegin', this.twopaneButton);
+                this.addButtonEventListener();
+                chrome.storage.local.get(['twopane'], (result) => {
+                    if (result.twopane === true) {
+                        this.toggleTwopane(true);
+                    }
+                });
+    
+            }
+        }
+        getElements() {
+            this.collapseButton = document.querySelector(".gaia-argoui-space-toolbar-collapse");
+            this.expandButton = document.querySelector(".gaia-argoui-space-toolbar-expand");
+            this.contentBody = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body");
+            this.contentRight = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-right ");
+        }
+        addButtonEventListener() {
+            this.twopaneButton.addEventListener('click', () => {
+                this.toggleTwopane(true);
+            });
+            this.collapseButton.addEventListener('click', () => {
+                this.toggleTwopane(false);
+            });
+            this.expandButton.addEventListener('click', () => {
+                this.toggleTwopane(false);
+            });
+        }
+        toggleTwopane(toCollapsed) {
+            if (toCollapsed === true) {
+                this.expandButton.click();
+                this.expandButton.classList.remove("is-active")
+                this.twopaneButton.classList.add("is-active")
+                this.contentBody.style.marginRight = "0px";
+                this.contentBody.style.borderRight = "0px";
+                this.contentRight.style.display = "none";
+                chrome.storage.local.set({twopane: true});
+            } else {
+                this.twopaneButton.classList.remove("is-active")
+                this.contentBody.style.marginRight = null;
+                this.contentBody.style.borderRight = null;
+                this.contentRight.style.display = null;
+                chrome.storage.local.set({twopane: false});
+            }
+        }
+    }
+
     var draggable;
+    var contentRight;
     var setup = () => {
         const intervalId = setInterval(() => {
             let threadlist = new ThredList();
@@ -130,6 +187,11 @@
                     draggable.setup(threadlist);
                 } else {
                     draggable = new DraggableBar(threadlist);
+                }
+                if (contentRight !== undefined) {
+                    contentRight.setup();
+                } else {
+                    contentRight = new ContentRight(threadlist);
                 }
                 clearInterval(intervalId);
             }
