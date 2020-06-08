@@ -1,5 +1,12 @@
 (() => {
     'use strict';
+    const timer = (delay) => {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(delay);
+            }, delay);
+        });
+    };
 
     class ThredList {
         constructor() {
@@ -7,6 +14,7 @@
             this.getElements();
             if (this.contentLeft !== null && this.contentBody !== null) {
                 this.ready = true;
+                this.addButtonEventListener();
                 let that = this;
                 chrome.storage.local.get(['thredListWidth'], (result) => {
                     if (result.thredListWidth !== undefined) {
@@ -21,6 +29,16 @@
             this.contentLeft = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-left");
             this.threadListItemLink = document.querySelectorAll(".gaia-argoui-space-threadlist-item-link");
             this.contentBody = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body");
+            this.readMore = document.querySelector(".gaia-argoui-space-threadlist-readmore");
+        }
+        addButtonEventListener() {
+            this.readMore.addEventListener('click', () => {
+                (async() => {
+                    await timer(200);
+                    this.getElements();
+                    this.changeWidth(this.contentBody.offsetLeft);
+                })();
+            });
         }
         changeWidth(width) {
             // super heavy
@@ -53,7 +71,7 @@
                 this.threadlist = threadlist;
                 this.setupThreadlist();
                 this.threadlist.addChangeWidthEventListener(() => {
-                    this.syncXPosition();
+                    this.layout();
                 });
                 this.draggableBar = document.createElement("div");
                 this.draggableBar.id = "kinspax-draggable-bar";
