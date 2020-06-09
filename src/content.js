@@ -13,7 +13,7 @@
         twopane: "twopane"
     };
 
-    class ThredList {
+    class ThredListAndBody {
         constructor() {
             this.changeWidtdhEventListners = [];
             this.getElements();
@@ -70,15 +70,15 @@
     }
 
     class DraggableBar {
-        constructor(threadlist) {
-            this.setup(threadlist);
+        constructor(threadListAndBody) {
+            this.setup(threadListAndBody);
         }
-        setup(threadlist) {
+        setup(threadListAndBody) {
             this.draggableBar = document.querySelector("#kinspax-draggable-bar");
             if (this.draggableBar === null) {
-                this.threadlist = threadlist;
+                this.threadListAndBody = threadListAndBody;
                 this.setupThreadlist();
-                this.threadlist.addChangeWidthEventListener(() => {
+                this.threadListAndBody.addChangeWidthEventListener(() => {
                     this.layout();
                 });
                 this.draggableBar = document.createElement("div");
@@ -92,10 +92,10 @@
             }
         }
         setupThreadlist() {
-            this.threadlist.contentLeft.ondragstart = () => {
+            this.threadListAndBody.contentLeft.ondragstart = () => {
                 return false;
             };
-            this.threadlist.contentBody.ondragstart = () => {
+            this.threadListAndBody.contentBody.ondragstart = () => {
                 return false;
             };
         }
@@ -108,7 +108,7 @@
             };
             let onMouseUp = (event) => {
                 if (event.pageX > 0) {
-                    that.threadlist.changeWidth(event.pageX);
+                    that.threadListAndBody.changeWidth(event.pageX);
                     that.draggableBar.style.left = event.pageX + "px";
                 }
             };
@@ -126,7 +126,7 @@
             };
             
             this.draggableBar.addEventListener('dblclick', function () {
-                that.threadlist.changeWidth(null);
+                that.threadListAndBody.changeWidth(null);
             });
         }
         layout() {
@@ -144,10 +144,10 @@
             }, 600);
         }
         syncXPosition() {
-            this.draggableBar.style.left = this.threadlist.contentBody.offsetLeft + "px";
+            this.draggableBar.style.left = this.threadListAndBody.contentBody.offsetLeft + "px";
         }
         insertBar() {
-            this.threadlist.contentLeft.insertAdjacentElement('afterend', this.draggableBar);
+            this.threadListAndBody.contentLeft.insertAdjacentElement('afterend', this.draggableBar);
         }
     }
 
@@ -211,17 +211,17 @@
     var contentRight;
     var setup = () => {
         const intervalId = setInterval(() => {
-            let threadlist = new ThredList();
-            if (threadlist.ready === true) {
+            let threadListAndBody = new ThredListAndBody();
+            if (threadListAndBody.ready === true) {
                 if (draggable !== undefined) {
-                    draggable.setup(threadlist);
+                    draggable.setup(threadListAndBody);
                 } else {
-                    draggable = new DraggableBar(threadlist);
+                    draggable = new DraggableBar(threadListAndBody);
                 }
                 if (contentRight !== undefined) {
                     contentRight.setup();
                 } else {
-                    contentRight = new ContentRight(threadlist);
+                    contentRight = new ContentRight(threadListAndBody);
                 }
                 clearInterval(intervalId);
             }
