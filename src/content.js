@@ -207,8 +207,35 @@
         }
     }
 
+    class FilterThread {
+        constructor(threadListAndBody) {
+            this.setup(threadListAndBody);
+        }
+        setup(threadListAndBody) {
+            this.threadListAndBody = threadListAndBody;
+            this.searchBox = document.querySelector("#kinspax-serchbox");
+            if (this.searchBox === null) {
+                this.createSearchBox();
+                this.insertSearchInput();
+            }
+        }
+        createSearchBox() {
+            this.searchBox = document.createElement("div");
+            this.searchBox.id = "kinspax-serchbox";
+            this.serachInput = document.createElement("input");
+            this.serachInput.id = "kinspax-searchbox-input";
+            this.serachInput.type = "text";
+            this.serachInput.placeholder = "Filter in Space";
+            this.searchBox.insertAdjacentElement('afterbegin', this.serachInput);
+        }
+        insertSearchInput() {
+            this.threadListAndBody.contentLeft.insertAdjacentElement('afterbegin', this.searchBox);
+        }
+    }
+
     var draggable;
     var contentRight;
+    var filterThread;
     var setup = () => {
         const intervalId = setInterval(() => {
             let threadListAndBody = new ThredListAndBody();
@@ -222,6 +249,11 @@
                     contentRight.setup();
                 } else {
                     contentRight = new ContentRight(threadListAndBody);
+                }
+                if (filterThread !== undefined) {
+                    filterThread.setup(threadListAndBody);
+                } else {
+                    filterThread = new FilterThread(threadListAndBody);
                 }
                 clearInterval(intervalId);
             }
