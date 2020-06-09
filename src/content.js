@@ -32,9 +32,9 @@
         }
         getElements() {
             this.contentLeft = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-left");
-            this.threadListItemLink = document.querySelectorAll(".gaia-argoui-space-threadlist-item-link");
+            this.threadListItemLink = document.querySelectorAll(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-item-link");
             this.contentBody = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body");
-            this.readMore = document.querySelector(".gaia-argoui-space-threadlist-readmore");
+            this.readMore = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore");
         }
         addEventListener() {
             this.readMore.addEventListener('click', () => {
