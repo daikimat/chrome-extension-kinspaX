@@ -19,7 +19,7 @@
             this.getElements();
             if (this.contentLeft !== null && this.contentBody !== null) {
                 this.ready = true;
-                this.addButtonEventListener();
+                this.addEventListener();
                 let that = this;
                 chrome.storage.local.get([storageKeys.thredListWidth], (result) => {
                     if (result.thredListWidth !== undefined) {
@@ -36,7 +36,7 @@
             this.contentBody = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body");
             this.readMore = document.querySelector(".gaia-argoui-space-threadlist-readmore");
         }
-        addButtonEventListener() {
+        addEventListener() {
             this.readMore.addEventListener('click', () => {
                 (async() => {
                     await timer(200);
