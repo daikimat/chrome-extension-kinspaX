@@ -61,7 +61,7 @@
             this.contentBody.style.marginLeft = widthWithPx;
             chrome.storage.local.set({ thredListWidth: width });
             this.changeWidtdhEventListners.forEach(listener => {
-                listener();
+                listener(width);
             });
         }
         addChangeWidthEventListener(listner) {
@@ -212,9 +212,12 @@
             this.setup(threadListAndBody);
         }
         setup(threadListAndBody) {
-            this.threadListAndBody = threadListAndBody;
             this.searchBox = document.querySelector("#kinspax-serchbox");
             if (this.searchBox === null) {
+                this.threadListAndBody = threadListAndBody;
+                this.threadListAndBody.addChangeWidthEventListener((width) => {
+                    this.layout(width);
+                });
                 this.createSearchBox();
                 this.insertSearchInput();
             }
@@ -230,6 +233,17 @@
         }
         insertSearchInput() {
             this.threadListAndBody.contentLeft.insertAdjacentElement('afterbegin', this.searchBox);
+        }
+        layout(width) {
+            let paddingLeft = parseInt(window.getComputedStyle(this.serachInput).getPropertyValue("padding-left"), 10);
+            let paddingRight = parseInt(window.getComputedStyle(this.serachInput).getPropertyValue("padding-right"), 10);
+            if (width !== null) {
+                var newWidth = width - paddingLeft - paddingRight;
+                newWidth = newWidth > 0 ? newWidth : 0;
+                this.serachInput.style.width = newWidth + "px";
+            } else {
+                this.serachInput.style.width = null;
+            }
         }
     }
 
