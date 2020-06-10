@@ -50,24 +50,16 @@
             if (this.ready === false) {
                 return;
             }
-            let widthWithPx = width + "px";
+            var widthWithPx = null;
+            if (width !== null) {
+                widthWithPx = width + "px";
+            }
             this.contentLeft.style.width = widthWithPx;
             this.threadListItemLink.forEach(element => {
                 element.style.width = widthWithPx;
             });
             this.contentBody.style.marginLeft = widthWithPx;
             chrome.storage.local.set({ thredListWidth: width });
-            this.changeWidtdhEventListners.forEach(listener => {
-                listener();
-            });
-        }
-        resetWidth() {
-            this.contentLeft.style.width = null;
-            this.threadListItemLink.forEach(element => {
-                element.style.width = null;
-            });
-            this.contentBody.style.marginLeft = null;
-            chrome.storage.local.remove(storageKeys.thredListWidth);
             this.changeWidtdhEventListners.forEach(listener => {
                 listener();
             });
@@ -134,7 +126,7 @@
             };
             
             this.draggableBar.addEventListener('dblclick', function () {
-                that.threadlist.resetWidth();
+                that.threadlist.changeWidth(null);
             });
         }
         layout() {
