@@ -56,6 +56,17 @@
                 listener();
             });
         }
+        resetWidth() {
+            this.contentLeft.style.width = null;
+            this.threadListItemLink.forEach(element => {
+                element.style.width = null;
+            });
+            this.contentBody.style.marginLeft = null;
+            chrome.storage.local.remove("thredListWidth");
+            this.changeWidtdhEventListners.forEach(listener => {
+                listener();
+            });
+        }
         addChangeWidthEventListener(listner) {
             this.changeWidtdhEventListners.push(listner);
         }
@@ -116,6 +127,10 @@
                     that.draggableBar.onmouseup = null;
                 };
             };
+            
+            this.draggableBar.addEventListener('dblclick', function () {
+                that.threadlist.resetWidth();
+            });
         }
         layout() {
             this.syncHeight();
