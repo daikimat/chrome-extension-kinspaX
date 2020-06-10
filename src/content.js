@@ -8,6 +8,11 @@
         });
     };
 
+    const storageKeys = {
+        thredListWidth: "thredListWidth",
+        twopane: "twopane"
+    };
+
     class ThredList {
         constructor() {
             this.changeWidtdhEventListners = [];
@@ -16,7 +21,7 @@
                 this.ready = true;
                 this.addButtonEventListener();
                 let that = this;
-                chrome.storage.local.get(['thredListWidth'], (result) => {
+                chrome.storage.local.get([storageKeys.thredListWidth], (result) => {
                     if (result.thredListWidth !== undefined) {
                         that.changeWidth(result.thredListWidth);
                     }
@@ -62,7 +67,7 @@
                 element.style.width = null;
             });
             this.contentBody.style.marginLeft = null;
-            chrome.storage.local.remove("thredListWidth");
+            chrome.storage.local.remove(storageKeys.thredListWidth);
             this.changeWidtdhEventListners.forEach(listener => {
                 listener();
             });
@@ -166,7 +171,7 @@
                 this.twopaneButton.id = "kinspax-twopane-button";
                 this.collapseButton.insertAdjacentElement('beforebegin', this.twopaneButton);
                 this.addButtonEventListener();
-                chrome.storage.local.get(['twopane'], (result) => {
+                chrome.storage.local.get([storageKeys.twopane], (result) => {
                     if (result.twopane === true) {
                         this.toggleTwopane(true);
                     }
