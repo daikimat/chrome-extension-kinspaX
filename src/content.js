@@ -8,15 +8,20 @@
         });
     };
 
+    const storageKeys = {
+        thredListWidth: "thredListWidth",
+        twopane: "twopane"
+    };
+
     class ThredList {
         constructor() {
             this.changeWidtdhEventListners = [];
             this.getElements();
             if (this.contentLeft !== null && this.contentBody !== null) {
                 this.ready = true;
-                this.addButtonEventListener();
+                this.addEventListener();
                 let that = this;
-                chrome.storage.local.get(['thredListWidth'], (result) => {
+                chrome.storage.local.get([storageKeys.thredListWidth], (result) => {
                     if (result.thredListWidth !== undefined) {
                         that.changeWidth(result.thredListWidth);
                     }
@@ -31,7 +36,7 @@
             this.contentBody = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body");
             this.readMore = document.querySelector(".gaia-argoui-space-threadlist-readmore");
         }
-        addButtonEventListener() {
+        addEventListener() {
             this.readMore.addEventListener('click', () => {
                 (async() => {
                     await timer(200);
@@ -45,7 +50,10 @@
             if (this.ready === false) {
                 return;
             }
-            let widthWithPx = width + "px";
+            var widthWithPx = null;
+            if (width !== null) {
+                widthWithPx = width + "px";
+            }
             this.contentLeft.style.width = widthWithPx;
             this.threadListItemLink.forEach(element => {
                 element.style.width = widthWithPx;
@@ -116,6 +124,10 @@
                     that.draggableBar.onmouseup = null;
                 };
             };
+            
+            this.draggableBar.addEventListener('dblclick', function () {
+                that.threadlist.changeWidth(null);
+            });
         }
         layout() {
             this.syncHeight();
@@ -151,7 +163,7 @@
                 this.twopaneButton.id = "kinspax-twopane-button";
                 this.collapseButton.insertAdjacentElement('beforebegin', this.twopaneButton);
                 this.addButtonEventListener();
-                chrome.storage.local.get(['twopane'], (result) => {
+                chrome.storage.local.get([storageKeys.twopane], (result) => {
                     if (result.twopane === true) {
                         this.toggleTwopane(true);
                     }
