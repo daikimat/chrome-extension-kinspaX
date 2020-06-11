@@ -8,6 +8,15 @@
         });
     };
 
+    const debounce = (callback, wait) => {
+        let timeout;
+        return (...args) => {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => callback.apply(context, args), wait);
+        };
+    };
+
     const storageKeys = {
         thredListWidth: "thredListWidth",
         twopane: "twopane"
@@ -33,14 +42,21 @@
         getElements() {
             this.contentLeft = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-left");
             this.threadListItemLink = document.querySelectorAll(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-item-link");
+            this.threadList = {};
+            this.threadListItemLink.forEach(element => {
+                this.threadList[element.title] = element.parentElement;
+            });
             this.contentBody = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body");
-            this.readMore = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore");
+            var readMores = document.querySelectorAll(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore");
+            this.readMore = readMores[readMores.length- 1];
         }
         addEventListener() {
             this.readMore.addEventListener('click', () => {
                 (async() => {
                     await timer(200);
                     this.getElements();
+                    this.filter(this.filterdKeyword);
+                    this.addEventListener();
                     this.changeWidth(this.contentBody.offsetLeft);
                 })();
             });
@@ -63,6 +79,20 @@
             this.changeWidtdhEventListners.forEach(listener => {
                 listener(width);
             });
+        }
+        filter(keyword) {
+            this.filterdKeyword = keyword;
+            Object.keys(this.threadList)
+                .forEach(key => {
+                    if (key.includes(keyword)) { 
+                        this.threadList[key].style.display = null;
+                    } else {
+                        this.threadList[key].style.display = "none";
+                    }
+                });
+            if (this.readMore.style.display !== "none") {
+                this.readMore.click();
+            }
         }
         addChangeWidthEventListener(listner) {
             this.changeWidtdhEventListners.push(listner);
@@ -125,7 +155,7 @@
                 };
             };
             
-            this.draggableBar.addEventListener('dblclick', function () {
+            this.draggableBar.addEventListener('dblclick', () => {
                 that.threadListAndBody.changeWidth(null);
             });
         }
@@ -219,6 +249,7 @@
                     this.layout(width);
                 });
                 this.createSearchBox();
+                this.addEventListener();
                 this.insertSearchInput();
             }
         }
@@ -228,8 +259,15 @@
             this.serachInput = document.createElement("input");
             this.serachInput.id = "kinspax-searchbox-input";
             this.serachInput.type = "text";
-            this.serachInput.placeholder = "Filter in Space";
+            this.serachInput.placeholder = "Filter Thread";
+            this.serachInput.autocomplete = "off";
             this.searchBox.insertAdjacentElement('afterbegin', this.serachInput);
+        }
+        addEventListener() {
+            this.serachInput.addEventListener('input', debounce((event) => {
+                let keyword = event.srcElement.value;
+                this.threadListAndBody.filter(keyword);
+            }, 300));
         }
         insertSearchInput() {
             this.threadListAndBody.contentLeft.insertAdjacentElement('afterbegin', this.searchBox);
