@@ -8,12 +8,21 @@
         });
     };
 
+    const debounce = (callback, wait) => {
+        let timeout;
+        return (...args) => {
+            const context = this;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => callback.apply(context, args), wait);
+        };
+    };
+
     const storageKeys = {
         thredListWidth: "thredListWidth",
         twopane: "twopane"
     };
 
-    class ThredList {
+    class ThredListAndBody {
         constructor() {
             this.changeWidtdhEventListners = [];
             this.getElements();
@@ -32,15 +41,22 @@
         }
         getElements() {
             this.contentLeft = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-left");
-            this.threadListItemLink = document.querySelectorAll(".gaia-argoui-space-threadlist-item-link");
+            this.threadListItemLink = document.querySelectorAll(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-item-link");
+            this.threadList = {};
+            this.threadListItemLink.forEach(element => {
+                this.threadList[element.title] = { item: element.parentElement, link: element };
+            });
             this.contentBody = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body");
-            this.readMore = document.querySelector(".gaia-argoui-space-threadlist-readmore");
+            var readMores = document.querySelectorAll(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore");
+            this.readMore = readMores[readMores.length- 1];
         }
         addEventListener() {
             this.readMore.addEventListener('click', () => {
                 (async() => {
                     await timer(200);
                     this.getElements();
+                    this.filter(this.filterdKeyword);
+                    this.addEventListener();
                     this.changeWidth(this.contentBody.offsetLeft);
                 })();
             });
@@ -61,8 +77,26 @@
             this.contentBody.style.marginLeft = widthWithPx;
             chrome.storage.local.set({ thredListWidth: width });
             this.changeWidtdhEventListners.forEach(listener => {
-                listener();
+                listener(width);
             });
+        }
+        filter(keyword) {
+            this.filterdKeyword = keyword;
+            Object.keys(this.threadList)
+                .forEach(key => {
+                    var item = this.threadList[key].item;
+                    var link =  this.threadList[key].link;
+                    if (key.includes(keyword)) { 
+                        item.style.display = null;
+                        link.innerHTML = key.replace(keyword, `<mark>${keyword}</mark>`);
+                    } else {
+                        item.style.display = "none";
+                        link.innerHTML = key;
+                    }
+                });
+            if (this.readMore.style.display !== "none") {
+                this.readMore.click();
+            }
         }
         addChangeWidthEventListener(listner) {
             this.changeWidtdhEventListners.push(listner);
@@ -70,15 +104,15 @@
     }
 
     class DraggableBar {
-        constructor(threadlist) {
-            this.setup(threadlist);
+        constructor(threadListAndBody) {
+            this.setup(threadListAndBody);
         }
-        setup(threadlist) {
+        setup(threadListAndBody) {
             this.draggableBar = document.querySelector("#kinspax-draggable-bar");
             if (this.draggableBar === null) {
-                this.threadlist = threadlist;
+                this.threadListAndBody = threadListAndBody;
                 this.setupThreadlist();
-                this.threadlist.addChangeWidthEventListener(() => {
+                this.threadListAndBody.addChangeWidthEventListener(() => {
                     this.layout();
                 });
                 this.draggableBar = document.createElement("div");
@@ -92,10 +126,10 @@
             }
         }
         setupThreadlist() {
-            this.threadlist.contentLeft.ondragstart = () => {
+            this.threadListAndBody.contentLeft.ondragstart = () => {
                 return false;
             };
-            this.threadlist.contentBody.ondragstart = () => {
+            this.threadListAndBody.contentBody.ondragstart = () => {
                 return false;
             };
         }
@@ -108,7 +142,7 @@
             };
             let onMouseUp = (event) => {
                 if (event.pageX > 0) {
-                    that.threadlist.changeWidth(event.pageX);
+                    that.threadListAndBody.changeWidth(event.pageX);
                     that.draggableBar.style.left = event.pageX + "px";
                 }
             };
@@ -125,8 +159,8 @@
                 };
             };
             
-            this.draggableBar.addEventListener('dblclick', function () {
-                that.threadlist.changeWidth(null);
+            this.draggableBar.addEventListener('dblclick', () => {
+                that.threadListAndBody.changeWidth(null);
             });
         }
         layout() {
@@ -144,10 +178,10 @@
             }, 600);
         }
         syncXPosition() {
-            this.draggableBar.style.left = this.threadlist.contentBody.offsetLeft + "px";
+            this.draggableBar.style.left = this.threadListAndBody.contentBody.offsetLeft + "px";
         }
         insertBar() {
-            this.threadlist.contentLeft.insertAdjacentElement('afterend', this.draggableBar);
+            this.threadListAndBody.contentLeft.insertAdjacentElement('afterend', this.draggableBar);
         }
     }
 
@@ -207,21 +241,75 @@
         }
     }
 
+    class FilterThread {
+        constructor(threadListAndBody) {
+            this.setup(threadListAndBody);
+        }
+        setup(threadListAndBody) {
+            this.searchBox = document.querySelector("#kinspax-serchbox");
+            if (this.searchBox === null) {
+                this.threadListAndBody = threadListAndBody;
+                this.threadListAndBody.addChangeWidthEventListener((width) => {
+                    this.layout(width);
+                });
+                this.createSearchBox();
+                this.addEventListener();
+                this.insertSearchInput();
+            }
+        }
+        createSearchBox() {
+            this.searchBox = document.createElement("div");
+            this.searchBox.id = "kinspax-serchbox";
+            this.serachInput = document.createElement("input");
+            this.serachInput.id = "kinspax-searchbox-input";
+            this.serachInput.type = "text";
+            this.serachInput.placeholder = "Filter Thread";
+            this.serachInput.autocomplete = "off";
+            this.searchBox.insertAdjacentElement('afterbegin', this.serachInput);
+        }
+        addEventListener() {
+            this.serachInput.addEventListener('input', debounce((event) => {
+                let keyword = event.srcElement.value;
+                this.threadListAndBody.filter(keyword);
+            }, 300));
+        }
+        insertSearchInput() {
+            this.threadListAndBody.contentLeft.insertAdjacentElement('afterbegin', this.searchBox);
+        }
+        layout(width) {
+            let paddingLeft = parseInt(window.getComputedStyle(this.serachInput).getPropertyValue("padding-left"), 10);
+            let paddingRight = parseInt(window.getComputedStyle(this.serachInput).getPropertyValue("padding-right"), 10);
+            if (width !== null) {
+                var newWidth = width - paddingLeft - paddingRight;
+                newWidth = newWidth > 0 ? newWidth : 0;
+                this.serachInput.style.width = newWidth + "px";
+            } else {
+                this.serachInput.style.width = null;
+            }
+        }
+    }
+
     var draggable;
     var contentRight;
+    var filterThread;
     var setup = () => {
         const intervalId = setInterval(() => {
-            let threadlist = new ThredList();
-            if (threadlist.ready === true) {
+            let threadListAndBody = new ThredListAndBody();
+            if (threadListAndBody.ready === true) {
                 if (draggable !== undefined) {
-                    draggable.setup(threadlist);
+                    draggable.setup(threadListAndBody);
                 } else {
-                    draggable = new DraggableBar(threadlist);
+                    draggable = new DraggableBar(threadListAndBody);
                 }
                 if (contentRight !== undefined) {
                     contentRight.setup();
                 } else {
-                    contentRight = new ContentRight(threadlist);
+                    contentRight = new ContentRight(threadListAndBody);
+                }
+                if (filterThread !== undefined) {
+                    filterThread.setup(threadListAndBody);
+                } else {
+                    filterThread = new FilterThread(threadListAndBody);
                 }
                 clearInterval(intervalId);
             }

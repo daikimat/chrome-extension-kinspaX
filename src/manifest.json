@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
   "name": "kinspaX",
-  "version": "1.3",
-  "description": "Change the width of the kintone space thread list to be draggable. And, add 2pane mode with thread list and body content.",
+  "version": "1.4",
+  "description": "Conveniently change the kintone space GUI",
   "homepage_url": "https://github.com/daikimat/chrome-extension-kinspaX",
   "icons": {
     "16": "images/icon-16.png",
