@@ -55,3 +55,8 @@
     box-shadow: none;
     color: #000;
 }
+
+.gaia-argoui-space-threadlist-item-link mark {
+    font-weight: 600;
+    background: none;
+}

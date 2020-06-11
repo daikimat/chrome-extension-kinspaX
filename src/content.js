@@ -44,7 +44,7 @@
             this.threadListItemLink = document.querySelectorAll(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-item-link");
             this.threadList = {};
             this.threadListItemLink.forEach(element => {
-                this.threadList[element.title] = element.parentElement;
+                this.threadList[element.title] = { item: element.parentElement, link: element };
             });
             this.contentBody = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body");
             var readMores = document.querySelectorAll(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore");
@@ -84,10 +84,14 @@
             this.filterdKeyword = keyword;
             Object.keys(this.threadList)
                 .forEach(key => {
+                    var item = this.threadList[key].item;
+                    var link =  this.threadList[key].link;
                     if (key.includes(keyword)) { 
-                        this.threadList[key].style.display = null;
+                        item.style.display = null;
+                        link.innerHTML = key.replace(keyword, `<mark>${keyword}</mark>`);
                     } else {
-                        this.threadList[key].style.display = "none";
+                        item.style.display = "none";
+                        link.innerHTML = key;
                     }
                 });
             if (this.readMore.style.display !== "none") {
