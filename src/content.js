@@ -81,6 +81,9 @@
             });
         }
         filter(keyword) {
+            if (typeof keyword !== "string") {
+                keyword = "";
+            }
             this.filterdKeyword = keyword;
             Object.keys(this.threadList)
                 .forEach(key => {
