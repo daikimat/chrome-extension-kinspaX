@@ -17,6 +17,17 @@
         };
     };
 
+    const throttle = (callback, interval) => {
+        var lastTime = Date.now() - interval;
+        return (...args) => {
+            const context = this;
+            if ((lastTime + interval) < Date.now()) {
+                lastTime = Date.now();
+                callback.apply(context, args);
+            }
+        };
+    };
+
     const storageKeys = {
         thredListWidth: "thredListWidth",
         twopane: "twopane"
@@ -29,6 +40,10 @@
             if (this.contentLeft !== null && this.contentBody !== null) {
                 this.ready = true;
                 this.addEventListener();
+                this.windowScrollEvent = throttle(() => {
+                    this.clickReadMoreIfDisplayed();
+                }, 50);
+                window.addEventListener('scroll', this.windowScrollEvent);
                 let that = this;
                 chrome.storage.local.get([storageKeys.thredListWidth], (result) => {
                     if (result.thredListWidth !== undefined) {
@@ -38,6 +53,14 @@
                 return;
             }
             this.ready = false;
+        }
+        clickReadMoreIfDisplayed() {
+            let isDisplayReadMore = (this.readMore.getBoundingClientRect().bottom - window.innerHeight - this.readMore.offsetHeight) < 0;
+            if (isDisplayReadMore && this.readMore.style.display !== "none") {
+                this.readMore.click();
+                this.readMore.style.display = "none";
+            }    
+
         }
         getElements() {
             this.contentLeft = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-left");
@@ -97,9 +120,7 @@
                         link.innerHTML = key;
                     }
                 });
-            if (this.readMore.style.display !== "none") {
-                this.readMore.click();
-            }
+            this.clickReadMoreIfDisplayed();
         }
         addChangeWidthEventListener(listner) {
             this.changeWidtdhEventListners.push(listner);
