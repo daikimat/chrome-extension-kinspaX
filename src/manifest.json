@@ -13,8 +13,11 @@
     {
       "matches": [
         "https://*.cybozu.com/k/*",
+        "https://*.cybozu-dev.com/k/*",
         "https://*.kintone.com/k/*",
-        "https://*.cybozu.cn/k/*"
+        "https://*.kintone-dev.com/k/*",
+        "https://*.cybozu.cn/k/*",
+        "https://*.cybozu-dev.cn/k/*"
       ],
       "css": ["content.css"],
       "js": ["content.js"]
