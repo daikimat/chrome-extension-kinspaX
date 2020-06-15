@@ -56,7 +56,7 @@
         }
         clickReadMoreIfDisplayed() {
             let isDisplayReadMore = (this.readMore.getBoundingClientRect().bottom - window.innerHeight - this.readMore.offsetHeight) < 0;
-            if (isDisplayReadMore && this.readMore.style.display !== "none") {
+            if (isDisplayReadMore && this.readMore.style.display !== "none" && this.readMoreLoading !== true) {
                 this.readMore.click();
             }    
 
