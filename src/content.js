@@ -42,7 +42,7 @@
                 this.addEventListener();
                 this.windowScrollEvent = throttle(() => {
                     this.clickReadMoreIfDisplayed();
-                }, 50);
+                }, 20);
                 window.addEventListener('scroll', this.windowScrollEvent);
                 let that = this;
                 chrome.storage.local.get([storageKeys.thredListWidth], (result) => {
@@ -58,7 +58,6 @@
             let isDisplayReadMore = (this.readMore.getBoundingClientRect().bottom - window.innerHeight - this.readMore.offsetHeight) < 0;
             if (isDisplayReadMore && this.readMore.style.display !== "none") {
                 this.readMore.click();
-                this.readMore.style.display = "none";
             }    
 
         }
@@ -75,12 +74,17 @@
         }
         addEventListener() {
             this.readMore.addEventListener('click', () => {
+                if (this.readMoreLoading) {
+                    return;
+                }
+                this.readMoreLoading = true;
                 (async() => {
-                    await timer(200);
+                    await timer(250);
                     this.getElements();
-                    this.filter(this.filterdKeyword);
                     this.addEventListener();
                     this.changeWidth(this.contentBody.offsetLeft);
+                    this.filter(this.filterdKeyword);
+                    this.readMoreLoading = false;
                 })();
             });
         }
