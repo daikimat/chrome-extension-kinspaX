@@ -19,11 +19,15 @@
 
     const throttle = (callback, interval) => {
         var lastTime = Date.now() - interval;
+        var timeoutId;
         return (...args) => {
             const context = this;
+            clearTimeout( timeoutId );
+            timeoutId = setTimeout(() => callback.apply(context, args), interval);
             if ((lastTime + interval) < Date.now()) {
                 lastTime = Date.now();
                 callback.apply(context, args);
+                return;
             }
         };
     };
@@ -42,7 +46,7 @@
                 this.addEventListener();
                 this.windowScrollEvent = throttle(() => {
                     this.clickReadMoreIfDisplayed();
-                }, 20);
+                }, 50);
                 window.addEventListener('scroll', this.windowScrollEvent);
                 let that = this;
                 chrome.storage.local.get([storageKeys.thredListWidth], (result) => {
@@ -55,7 +59,7 @@
             this.ready = false;
         }
         clickReadMoreIfDisplayed() {
-            let isDisplayReadMore = (this.readMore.getBoundingClientRect().bottom - window.innerHeight - this.readMore.offsetHeight) < 0;
+            let isDisplayReadMore = (this.readMore.getBoundingClientRect().top - window.innerHeight) < 0;
             if (isDisplayReadMore && this.readMore.style.display !== "none" && this.readMoreLoading !== true) {
                 this.readMore.click();
             }    
@@ -83,8 +87,8 @@
                     this.getElements();
                     this.addEventListener();
                     this.changeWidth(this.contentBody.offsetLeft);
-                    this.filter(this.filterdKeyword);
                     this.readMoreLoading = false;
+                    this.filter(this.filterdKeyword);
                 })();
             });
         }
