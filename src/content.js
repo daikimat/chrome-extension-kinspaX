@@ -68,9 +68,13 @@
         getElements() {
             this.contentLeft = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-left");
             this.threadListItemLink = document.querySelectorAll(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-item-link");
-            this.threadList = {};
+            this.threadList = [];
             this.threadListItemLink.forEach(element => {
-                this.threadList[element.title] = { item: element.parentElement, link: element };
+                this.threadList.push({
+                    title: element.title,
+                    item: element.parentElement,
+                    link: element
+                });
             });
             this.contentBody = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body");
             var readMores = document.querySelectorAll(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore");
@@ -116,18 +120,17 @@
                 keyword = "";
             }
             this.filterdKeyword = keyword;
-            Object.keys(this.threadList)
-                .forEach(key => {
-                    var item = this.threadList[key].item;
-                    var link =  this.threadList[key].link;
-                    if (key.includes(keyword)) { 
-                        item.style.display = null;
-                        link.innerHTML = key.replace(keyword, `<mark>${keyword}</mark>`);
-                    } else {
-                        item.style.display = "none";
-                        link.innerHTML = key;
-                    }
-                });
+            this.threadList.forEach(thread => {
+                var item = thread.item;
+                var link =  thread.link;
+                if (thread.title.includes(keyword)) { 
+                    item.style.display = null;
+                    link.innerHTML = thread.title.replace(keyword, `<mark>${keyword}</mark>`);
+                } else {
+                    item.style.display = "none";
+                    link.innerHTML = thread.title;
+                }
+            });
             this.clickReadMoreIfDisplayed();
         }
         addChangeWidthEventListener(listner) {
@@ -303,7 +306,7 @@
             this.serachInput.addEventListener('input', debounce((event) => {
                 let keyword = event.srcElement.value;
                 this.threadListAndBody.filter(keyword);
-            }, 300));
+            }, 200));
         }
         insertSearchInput() {
             this.threadListAndBody.contentLeft.insertAdjacentElement('afterbegin', this.searchBox);
