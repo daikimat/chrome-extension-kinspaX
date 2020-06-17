@@ -306,7 +306,7 @@
             this.serachInput.addEventListener('input', debounce((event) => {
                 let keyword = event.srcElement.value;
                 this.threadListAndBody.filter(keyword);
-            }, 300));
+            }, 200));
         }
         insertSearchInput() {
             this.threadListAndBody.contentLeft.insertAdjacentElement('afterbegin', this.searchBox);
