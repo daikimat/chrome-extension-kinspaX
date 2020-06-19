@@ -19,11 +19,8 @@
 
     const throttle = (callback, interval) => {
         var lastTime = Date.now() - interval;
-        var timeoutId;
         return (...args) => {
             const context = this;
-            clearTimeout( timeoutId );
-            timeoutId = setTimeout(() => callback.apply(context, args), interval);
             if ((lastTime + interval) < Date.now()) {
                 lastTime = Date.now();
                 callback.apply(context, args);
@@ -45,7 +42,10 @@
                 this.ready = true;
                 this.addEventListener();
                 this.windowScrollEvent = throttle(() => {
-                    this.clickReadMoreIfDisplayed();
+                    (async () => {
+                        await timer(50);
+                        this.clickReadMoreIfDisplayed();
+                    })();
                 }, 50);
                 window.addEventListener('scroll', this.windowScrollEvent);
                 let that = this;
