@@ -19,11 +19,8 @@
 
     const throttle = (callback, interval) => {
         var lastTime = Date.now() - interval;
-        var timeoutId;
         return (...args) => {
             const context = this;
-            clearTimeout( timeoutId );
-            timeoutId = setTimeout(() => callback.apply(context, args), interval);
             if ((lastTime + interval) < Date.now()) {
                 lastTime = Date.now();
                 callback.apply(context, args);
@@ -45,7 +42,10 @@
                 this.ready = true;
                 this.addEventListener();
                 this.windowScrollEvent = throttle(() => {
-                    this.clickReadMoreIfDisplayed();
+                    (async () => {
+                        await timer(50);
+                        this.clickReadMoreIfDisplayed();
+                    })();
                 }, 50);
                 window.addEventListener('scroll', this.windowScrollEvent);
                 let that = this;
@@ -62,7 +62,7 @@
             let isDisplayReadMore = (this.readMore.getBoundingClientRect().top - window.innerHeight) < 0;
             if (isDisplayReadMore && this.readMore.style.display !== "none" && this.readMoreLoading !== true) {
                 this.readMore.click();
-            }    
+            }
 
         }
         getElements() {
@@ -78,7 +78,7 @@
             });
             this.contentBody = document.querySelector(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body");
             var readMores = document.querySelectorAll(".gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore");
-            this.readMore = readMores[readMores.length- 1];
+            this.readMore = readMores[readMores.length - 1];
         }
         addEventListener() {
             this.readMore.addEventListener('click', () => {
@@ -86,7 +86,7 @@
                     return;
                 }
                 this.readMoreLoading = true;
-                (async() => {
+                (async () => {
                     await timer(250);
                     this.getElements();
                     this.addEventListener();
@@ -122,8 +122,8 @@
             this.filterdKeyword = keyword;
             this.threadList.forEach(thread => {
                 var item = thread.item;
-                var link =  thread.link;
-                if (thread.title.includes(keyword)) { 
+                var link = thread.link;
+                if (thread.title.includes(keyword)) {
                     item.style.display = null;
                     link.innerHTML = thread.title.replace(keyword, `<mark>${keyword}</mark>`);
                 } else {
@@ -193,7 +193,7 @@
                     that.draggableBar.onmouseup = null;
                 };
             };
-            
+
             this.draggableBar.addEventListener('dblclick', () => {
                 that.threadListAndBody.changeWidth(null);
             });
@@ -307,6 +307,60 @@
                 let keyword = event.srcElement.value;
                 this.threadListAndBody.filter(keyword);
             }, 200));
+
+            this.serachInput.addEventListener('keydown', throttle((event) => {
+                if (event.isComposing) {
+                    return;
+                }
+                let keyword = event.srcElement.value;
+                if (keyword.length === 0) {
+                    return;
+                }
+                var keyName = event.key;
+                if (keyName === "ArrowDown") {
+                    this.selectNext();
+                } else if (keyName === "ArrowUp") {
+                    this.selectPrev();
+                }
+            }, 100));
+        }
+        selectNext() {
+            var selectedIndex = -1;
+            var firstDisplayedLink = null;
+            let nextThread = this.threadListAndBody.threadList.filter((thread) => {
+                return thread.item.style.display !== "none";
+            }).find((thread, index) => {
+                if (firstDisplayedLink === null) {
+                    firstDisplayedLink = thread.link;
+                }
+                if (thread.link.classList.contains("selected")) {
+                    selectedIndex = index;
+                } else if (selectedIndex >= 0) {
+                    return true;
+                }
+                return false;
+            });
+            if (nextThread !== undefined) {
+                nextThread.link.click();
+            } else if (selectedIndex === -1 && firstDisplayedLink != null) {
+                firstDisplayedLink.click();
+            }
+        }
+        selectPrev() {
+            var selectedIndex = -1;
+            let prevThread = this.threadListAndBody.threadList.slice().reverse().filter((thread) => {
+                return thread.item.style.display !== "none";
+            }).find((thread, index) => {
+                if (thread.link.classList.contains("selected")) {
+                    selectedIndex = index;
+                } else if (selectedIndex >= 0) {
+                    return true;
+                }
+                return false;
+            });
+            if (prevThread !== undefined) {
+                prevThread.link.click();
+            }
         }
         insertSearchInput() {
             this.threadListAndBody.contentLeft.insertAdjacentElement('afterbegin', this.searchBox);
@@ -329,6 +383,10 @@
     var filterThread;
     var setup = () => {
         const intervalId = setInterval(() => {
+            if (chrome.storage === undefined) {
+                console.log("chrome.storage is undefined");
+                return;
+            }
             let threadListAndBody = new ThredListAndBody();
             if (threadListAndBody.ready === true) {
                 if (draggable !== undefined) {
