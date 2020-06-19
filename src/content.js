@@ -307,6 +307,56 @@
                 let keyword = event.srcElement.value;
                 this.threadListAndBody.filter(keyword);
             }, 200));
+
+            this.serachInput.addEventListener('keydown', throttle((event) => {   
+                if (event.isComposing) {
+                    return;
+                }
+                var keyName = event.key;
+                if (keyName === "ArrowDown") {
+                    this.selectNext();
+                } else if (keyName === "ArrowUp") {
+                    this.selectPrev();
+                }
+            }, 100));
+        }
+        selectNext() {
+            var selectedIndex = -1;
+            var firstDisplayedLink = null;
+            let nextThread = this.threadListAndBody.threadList.filter((thread) => {
+                return thread.item.style.display !== "none";
+            }).find((thread, index) => {
+                if (firstDisplayedLink === null) {
+                    firstDisplayedLink = thread.link;
+                }
+                if (thread.link.classList.contains("selected")) {
+                    selectedIndex = index;
+                } else if (selectedIndex >= 0) {
+                    return true;
+                }
+                return false;
+            });
+            if (nextThread !== undefined) {                
+                nextThread.link.click();
+            } else if (selectedIndex === -1 && firstDisplayedLink != null) {
+                firstDisplayedLink.click();
+            }
+        }
+        selectPrev() {
+            var selectedIndex = -1;
+            let prevThread = this.threadListAndBody.threadList.slice().reverse().filter((thread) => {
+                return thread.item.style.display !== "none";
+            }).find((thread, index) => {
+                if (thread.link.classList.contains("selected")) {
+                    selectedIndex = index;
+                } else if (selectedIndex >= 0) {
+                    return true;
+                }
+                return false;
+            });
+            if (prevThread !== undefined) {
+                prevThread.link.click();
+            }
         }
         insertSearchInput() {
             this.threadListAndBody.contentLeft.insertAdjacentElement('afterbegin', this.searchBox);
