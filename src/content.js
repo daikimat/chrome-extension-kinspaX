@@ -312,6 +312,10 @@
                 if (event.isComposing) {
                     return;
                 }
+                let keyword = event.srcElement.value;
+                if (keyword.length === 0) {
+                    return;
+                }
                 var keyName = event.key;
                 if (keyName === "ArrowDown") {
                     this.selectNext();
