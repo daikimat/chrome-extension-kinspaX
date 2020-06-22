@@ -318,8 +318,10 @@
                 }
                 var keyName = event.key;
                 if (keyName === "ArrowDown") {
+                    event.preventDefault();
                     this.selectNext();
                 } else if (keyName === "ArrowUp") {
+                    event.preventDefault();
                     this.selectPrev();
                 }
             }, 100));
