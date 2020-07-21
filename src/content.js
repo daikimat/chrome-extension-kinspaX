@@ -59,8 +59,9 @@
             this.ready = false;
         }
         clickReadMoreIfDisplayed() {
-            let isDisplayReadMore = (this.readMore.getBoundingClientRect().top - window.innerHeight) < 0;
-            if (isDisplayReadMore && this.readMore.style.display !== "none" && this.readMoreLoading !== true) {
+            let isDisplayReadMore = (this.readMore.offsetParent !== null && this.readMore.style.display !== "none");
+            let isDisplayScrollPosition = (this.readMore.getBoundingClientRect().top - window.innerHeight) < 0;
+            if (isDisplayReadMore && isDisplayScrollPosition && this.readMoreLoading !== true) {
                 this.readMore.click();
             }
 
@@ -399,7 +400,7 @@
                 if (contentRight !== undefined) {
                     contentRight.setup();
                 } else {
-                    contentRight = new ContentRight(threadListAndBody);
+                    contentRight = new ContentRight();
                 }
                 if (filterThread !== undefined) {
                     filterThread.setup(threadListAndBody);
