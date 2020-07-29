@@ -1,62 +1,63 @@
 #kinspax-draggable-bar {
-    width: 8px;
-    cursor: col-resize;
-    margin-left: -4px;
-    opacity: 0;
-    background-color: #a1a1a1;
-    position: absolute;
-    z-index: 9;
+  width: 8px;
+  cursor: col-resize;
+  margin-left: -4px;
+  opacity: 0;
+  background-color: #a1a1a1;
+  position: absolute;
+  z-index: 9;
 }
 
 #kinspax-draggable-bar:hover {
-    opacity: 0.3;
+  opacity: 0.3;
 }
 
 .gaia-argoui-space-spacecontent.collapsed #kinspax-draggable-bar {
-    display: none;
+  display: none;
 }
+
 .gaia-argoui-space-spacecontent.collapsed.three-pane .gaia-argoui-space-spacecontent-body {
-    margin-left: 0px!important;
+  margin-left: 0 !important;
 }
 
 #kinspax-twopane-button {
-    background-color: transparent;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-image: url('chrome-extension://__MSG_@@extension_id__/images/twopane.png');
-    display: inline-block;
-    width: 48px;
-    height: 48px;
-    vertical-align: middle;
-    margin-left: 8px;
+  background-color: transparent;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-image: url('chrome-extension://__MSG_@@extension_id__/images/twopane.png');
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  vertical-align: middle;
+  margin-left: 8px;
 }
 
 #kinspax-twopane-button.is-active {
-    background-image: url('chrome-extension://__MSG_@@extension_id__/images/twopane-active.png');
+  background-image: url('chrome-extension://__MSG_@@extension_id__/images/twopane-active.png');
 }
 
 #kinspax-searchbox {
-    border-bottom: 1px solid #e3e7e8;
+  border-bottom: 1px solid #e3e7e8;
 }
 
 #kinspax-searchbox-input {
-    height: 64px;
-    width: 152px;
-    padding: 0 64px 0 24px;
-    margin: 0px 0px 1px 0px;
-    border: none;
-    color: #888;
-    background-color: #fff;
-    box-shadow: 2px 2px 4px #f5f5f5 inset, -2px -2px 4px #f5f5f5 inset;
+  height: 64px;
+  width: 152px;
+  padding: 0 64px 0 24px;
+  margin: 0 0 1px 0;
+  border: none;
+  color: #888;
+  background-color: #fff;
+  box-shadow: 2px 2px 4px #f5f5f5 inset, -2px -2px 4px #f5f5f5 inset;
 }
 
 #kinspax-searchbox-input:focus {
-    background-color: #e2f2fe;
-    box-shadow: none;
-    color: #000;
+  background-color: #e2f2fe;
+  box-shadow: none;
+  color: #000;
 }
 
 .gaia-argoui-space-threadlist-item-link mark {
-    font-weight: 600;
-    background: none;
+  font-weight: 600;
+  background: none;
 }
