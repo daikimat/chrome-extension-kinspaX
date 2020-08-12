@@ -1,0 +1,11 @@
+{
+  "extName" : {
+    "message": "kinspaX"
+  },
+  "extDescription" : {
+    "message" : "kintone space UI extention that suit your every need."
+  },
+  "serachInputPlaceholder": {
+    "message" : "Filter Thread"
+  }
+}
