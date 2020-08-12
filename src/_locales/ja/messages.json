@@ -1,0 +1,11 @@
+{
+  "extName" : {
+    "message": "kinspaX"
+  },
+  "extDescription" : {
+    "message" : "kintoneのスペース昨日の痒いところに手を届けます。"
+  },
+  "serachInputPlaceholder": {
+    "message" : "スレッドを絞り込む"
+  }
+}

@@ -315,7 +315,7 @@
       this.serachInput = document.createElement('input')
       this.serachInput.id = 'kinspax-searchbox-input'
       this.serachInput.type = 'text'
-      this.serachInput.placeholder = 'Filter Thread'
+      this.serachInput.placeholder = chrome.i18n.getMessage('serachInputPlaceholder')
       this.serachInput.autocomplete = 'off'
       this.searchBox.insertAdjacentElement('afterbegin', this.serachInput)
     }
