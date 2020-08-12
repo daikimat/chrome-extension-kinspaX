@@ -18,7 +18,7 @@
   }
 
   const throttle = (callback, interval) => {
-    var lastTime = Date.now() - interval
+    let lastTime = Date.now() - interval
     return (...args) => {
       const context = this
       if ((lastTime + interval) < Date.now()) {
@@ -78,7 +78,7 @@
         })
       })
       this.contentBody = document.querySelector('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body')
-      var readMores = document.querySelectorAll('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore')
+      const readMores = document.querySelectorAll('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore')
       this.readMore = readMores[readMores.length - 1]
     }
 
@@ -104,7 +104,7 @@
       if (this.ready === false) {
         return
       }
-      var widthWithPx = null
+      let widthWithPx = null
       if (width !== null) {
         widthWithPx = width + 'px'
       }
@@ -125,8 +125,8 @@
       }
       this.filterdKeyword = keyword
       this.threadList.forEach(thread => {
-        var item = thread.item
-        var link = thread.link
+        const item = thread.item
+        const link = thread.link
         if (thread.title.includes(keyword)) {
           item.style.display = null
           link.innerHTML = thread.title.replace(keyword, `<mark>${keyword}</mark>`)
@@ -334,7 +334,7 @@
         if (keyword.length === 0) {
           return
         }
-        var keyName = event.key
+        const keyName = event.key
         if (keyName === 'ArrowDown') {
           event.preventDefault()
           this.selectNext()
@@ -346,8 +346,8 @@
     }
 
     selectNext () {
-      var selectedIndex = -1
-      var firstDisplayedLink = null
+      let selectedIndex = -1
+      let firstDisplayedLink = null
       const nextThread = this.threadListAndBody.threadList.filter((thread) => {
         return thread.item.style.display !== 'none'
       }).find((thread, index) => {
@@ -369,7 +369,7 @@
     }
 
     selectPrev () {
-      var selectedIndex = -1
+      let selectedIndex = -1
       const prevThread = this.threadListAndBody.threadList.slice().reverse().filter((thread) => {
         return thread.item.style.display !== 'none'
       }).find((thread, index) => {
@@ -393,7 +393,7 @@
       const paddingLeft = parseInt(window.getComputedStyle(this.serachInput).getPropertyValue('padding-left'), 10)
       const paddingRight = parseInt(window.getComputedStyle(this.serachInput).getPropertyValue('padding-right'), 10)
       if (width !== null) {
-        var newWidth = width - paddingLeft - paddingRight
+        let newWidth = width - paddingLeft - paddingRight
         newWidth = newWidth > 0 ? newWidth : 0
         this.serachInput.style.width = newWidth + 'px'
       } else {
@@ -402,10 +402,10 @@
     }
   }
 
-  var draggable
-  var contentRight
-  var filterThread
-  var setup = () => {
+  let draggable
+  let contentRight
+  let filterThread
+  const setup = () => {
     const intervalId = setInterval(() => {
       if (chrome.storage === undefined) {
         console.log('chrome.storage is undefined')
