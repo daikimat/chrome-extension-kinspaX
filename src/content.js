@@ -30,14 +30,15 @@
 
   const storageKeys = {
     thredListWidth: 'thredListWidth',
+    rightPaneWidth: 'rightPaneWidth',
     twopane: 'twopane'
   }
 
   class ThredListAndBody {
     constructor () {
-      this.changeWidtdhEventListners = []
+      this.changeWidthEventListners = []
       this.getElements()
-      if (this.contentLeft !== null && this.contentBody !== null) {
+      if (this.contentLeftPane !== null && this.contentRightPane !== null && this.contentBody !== null) {
         this.ready = true
         this.addEventListener()
         this.windowScrollEvent = throttle(() => {
@@ -48,9 +49,12 @@
         }, 50)
         window.addEventListener('scroll', this.windowScrollEvent)
         const that = this
-        chrome.storage.local.get([storageKeys.thredListWidth], (result) => {
+        chrome.storage.local.get([storageKeys.thredListWidth, storageKeys.rightPaneWidth], (result) => {
           if (result.thredListWidth !== undefined) {
-            that.changeWidth(result.thredListWidth)
+            that.changeLeftPaneWidth(result.thredListWidth)
+          }
+          if (result.rightPaneWidth !== undefined) {
+            that.changeRightPaneWidth(result.rightPaneWidth)
           }
         })
         return
@@ -67,7 +71,8 @@
     }
 
     getElements () {
-      this.contentLeft = document.querySelector('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-left')
+      this.contentLeftPane = document.querySelector('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-left')
+      this.contentRightPane = document.querySelector('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-right')
       this.threadListItemLink = document.querySelectorAll('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-item-link')
       this.threadList = []
       this.threadListItemLink.forEach(element => {
@@ -92,14 +97,14 @@
           await timer(250)
           this.getElements()
           this.addEventListener()
-          this.changeWidth(this.contentBody.offsetLeft)
+          this.changeLeftPaneWidth(this.contentBody.offsetLeft)
           this.readMoreLoading = false
           this.filter(this.filterdKeyword)
         })()
       })
     }
 
-    changeWidth (width) {
+    changeLeftPaneWidth (width) {
       // super heavy
       if (this.ready === false) {
         return
@@ -108,13 +113,30 @@
       if (width !== null) {
         widthWithPx = width + 'px'
       }
-      this.contentLeft.style.width = widthWithPx
+      this.contentLeftPane.style.width = widthWithPx
       this.threadListItemLink.forEach(element => {
         element.style.width = widthWithPx
       })
       this.contentBody.style.marginLeft = widthWithPx
       chrome.storage.local.set({ thredListWidth: width })
-      this.changeWidtdhEventListners.forEach(listener => {
+      this.changeWidthEventListners.forEach(listener => {
+        listener(width)
+      })
+    }
+
+    changeRightPaneWidth (width) {
+      // super heavy
+      if (this.ready === false) {
+        return
+      }
+      let widthWithPx = null
+      if (width !== null) {
+        widthWithPx = width + 'px'
+      }
+      this.contentRightPane.style.width = widthWithPx
+      this.contentBody.style.marginRight = widthWithPx
+      chrome.storage.local.set({ rightPaneWidth: width })
+      this.changeWidthEventListners.forEach(listener => {
         listener(width)
       })
     }
@@ -139,17 +161,17 @@
     }
 
     addChangeWidthEventListener (listner) {
-      this.changeWidtdhEventListners.push(listner)
+      this.changeWidthEventListners.push(listner)
     }
   }
 
-  class DraggableBar {
+  class LeftDraggableBar {
     constructor (threadListAndBody) {
       this.setup(threadListAndBody)
     }
 
     setup (threadListAndBody) {
-      this.draggableBar = document.querySelector('#kinspax-draggable-bar')
+      this.draggableBar = document.querySelector('#kinspax-draggable-bar-left')
       if (this.draggableBar === null) {
         this.threadListAndBody = threadListAndBody
         this.setupThreadlist()
@@ -157,7 +179,7 @@
           this.layout()
         })
         this.draggableBar = document.createElement('div')
-        this.draggableBar.id = 'kinspax-draggable-bar'
+        this.draggableBar.id = 'kinspax-draggable-bar-left'
         this.layout()
         this.setupMouseEvent()
         this.insertBar()
@@ -168,7 +190,7 @@
     }
 
     setupThreadlist () {
-      this.threadListAndBody.contentLeft.ondragstart = () => {
+      this.threadListAndBody.contentRightPane.ondragstart = () => {
         return false
       }
       this.threadListAndBody.contentBody.ondragstart = () => {
@@ -185,7 +207,7 @@
       }
       const onMouseUp = (event) => {
         if (event.pageX > 0) {
-          that.threadListAndBody.changeWidth(event.pageX)
+          that.threadListAndBody.changeLeftPaneWidth(event.pageX)
           that.draggableBar.style.left = event.pageX + 'px'
         }
       }
@@ -203,7 +225,7 @@
       }
 
       this.draggableBar.addEventListener('dblclick', () => {
-        that.threadListAndBody.changeWidth(null)
+        that.threadListAndBody.changeLeftPaneWidth(null)
       })
     }
 
@@ -228,7 +250,98 @@
     }
 
     insertBar () {
-      this.threadListAndBody.contentLeft.insertAdjacentElement('afterend', this.draggableBar)
+      this.threadListAndBody.contentLeftPane.insertAdjacentElement('afterend', this.draggableBar)
+    }
+  }
+
+  class RightDraggableBar {
+    constructor (threadListAndBody) {
+      this.setup(threadListAndBody)
+    }
+
+    setup (threadListAndBody) {
+      this.draggableBar = document.querySelector('#kinspax-draggable-bar-right')
+      if (this.draggableBar === null) {
+        this.threadListAndBody = threadListAndBody
+        this.setupThreadlist()
+        this.threadListAndBody.addChangeWidthEventListener(() => {
+          this.layout()
+        })
+        this.draggableBar = document.createElement('div')
+        this.draggableBar.id = 'kinspax-draggable-bar-right'
+        this.layout()
+        this.setupMouseEvent()
+        this.insertBar()
+      } else {
+        this.layout()
+        this.setupMouseEvent()
+      }
+    }
+
+    setupThreadlist () {
+      this.threadListAndBody.contentLeftPane.ondragstart = () => {
+        return false
+      }
+      this.threadListAndBody.contentBody.ondragstart = () => {
+        return false
+      }
+    }
+
+    setupMouseEvent () {
+      const that = this
+      const onMouseMove = (event) => {
+        if (event.pageX > 0) {
+          that.draggableBar.style.left = event.pageX + 'px'
+        }
+      }
+      const onMouseUp = (event) => {
+        if (event.pageX > 0) {
+          that.threadListAndBody.changeRightPaneWidth(document.body.scrollWidth - event.pageX)
+          that.draggableBar.style.left = event.pageX + 'px'
+        }
+      }
+      that.draggableBar.ondragstart = () => {
+        return false
+      }
+
+      that.draggableBar.onmousedown = () => {
+        document.addEventListener('mousemove', onMouseMove)
+        that.draggableBar.onmouseup = (event) => {
+          onMouseUp(event)
+          document.removeEventListener('mousemove', onMouseMove)
+          that.draggableBar.onmouseup = null
+        }
+      }
+
+      this.draggableBar.addEventListener('dblclick', () => {
+        that.threadListAndBody.changeRightPaneWidth(null)
+      })
+    }
+
+    layout () {
+      this.syncHeight()
+      this.syncXPosition()
+    }
+
+    syncHeight () {
+      const intervalId = setInterval(() => {
+        const spacebody = document.querySelector('.gaia-argoui-space-spacelayout-body')
+        const computedStyleHeight = parseInt(window.getComputedStyle(spacebody).getPropertyValue('height'), 10)
+        if (computedStyleHeight > 0) {
+          this.draggableBar.style.height = computedStyleHeight + 'px'
+          clearInterval(intervalId)
+        }
+      }, 600)
+    }
+
+    syncXPosition () {
+      this.draggableBar.style.left = this.threadListAndBody.contentBody.offsetLeft +
+        this.threadListAndBody.contentBody.offsetWidth +
+        'px'
+    }
+
+    insertBar () {
+      this.threadListAndBody.contentRightPane.insertAdjacentElement('afterend', this.draggableBar)
     }
   }
 
@@ -386,7 +499,7 @@
     }
 
     insertSearchInput () {
-      this.threadListAndBody.contentLeft.insertAdjacentElement('afterbegin', this.searchBox)
+      this.threadListAndBody.contentLeftPane.insertAdjacentElement('afterbegin', this.searchBox)
     }
 
     layout (width) {
@@ -402,7 +515,8 @@
     }
   }
 
-  let draggable
+  let leftDraggable
+  let rightDraggable
   let contentRight
   let filterThread
   const setup = () => {
@@ -413,10 +527,15 @@
       }
       const threadListAndBody = new ThredListAndBody()
       if (threadListAndBody.ready === true) {
-        if (draggable !== undefined) {
-          draggable.setup(threadListAndBody)
+        if (leftDraggable !== undefined) {
+          leftDraggable.setup(threadListAndBody)
         } else {
-          draggable = new DraggableBar(threadListAndBody)
+          leftDraggable = new LeftDraggableBar(threadListAndBody)
+        }
+        if (rightDraggable !== undefined) {
+          rightDraggable.setup(threadListAndBody)
+        } else {
+          rightDraggable = new RightDraggableBar(threadListAndBody)
         }
         if (contentRight !== undefined) {
           contentRight.setup()
