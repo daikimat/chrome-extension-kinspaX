@@ -346,7 +346,7 @@
     }
   }
 
-  class ContentRight {
+  class PaneModeController {
     constructor (threadListAndBody) {
       this.setup(threadListAndBody)
     }
@@ -519,7 +519,7 @@
 
   let leftDraggable
   let rightDraggable
-  let contentRight
+  let paneModeController
   let filterThread
   const setup = () => {
     const intervalId = setInterval(() => {
@@ -539,10 +539,10 @@
         } else {
           rightDraggable = new RightDraggableBar(threadListAndBody)
         }
-        if (contentRight !== undefined) {
-          contentRight.setup(threadListAndBody)
+        if (paneModeController !== undefined) {
+          paneModeController.setup(threadListAndBody)
         } else {
-          contentRight = new ContentRight(threadListAndBody)
+          paneModeController = new PaneModeController(threadListAndBody)
         }
         if (filterThread !== undefined) {
           filterThread.setup(threadListAndBody)
