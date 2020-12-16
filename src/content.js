@@ -120,7 +120,7 @@
       this.contentBody.style.marginLeft = widthWithPx
       chrome.storage.local.set({ thredListWidth: width })
       this.changeWidthEventListners.forEach(listener => {
-        listener(width)
+        listener()
       })
     }
 
@@ -137,7 +137,7 @@
       this.contentBody.style.marginRight = widthWithPx
       chrome.storage.local.set({ rightPaneWidth: width })
       this.changeWidthEventListners.forEach(listener => {
-        listener(width)
+        listener()
       })
     }
 
@@ -413,8 +413,10 @@
       this.searchBox = document.querySelector('#kinspax-serchbox')
       if (this.searchBox === null) {
         this.threadListAndBody = threadListAndBody
-        this.threadListAndBody.addChangeWidthEventListener((width) => {
-          this.layout(width)
+        this.threadListAndBody.addChangeWidthEventListener(() => {
+          if (this.threadListAndBody.ready === true) {
+            this.layout(this.threadListAndBody.contentLeftPane.style.width.replace('px', ''))
+          }
         })
         this.createSearchBox()
         this.addEventListener()
