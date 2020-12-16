@@ -135,6 +135,7 @@
       }
       this.contentRightPane.style.width = widthWithPx
       this.contentBody.style.marginRight = widthWithPx
+      this.contentBody.style.borderRight = widthWithPx
       chrome.storage.local.set({ rightPaneWidth: width })
       this.changeWidthEventListners.forEach(listener => {
         listener()
@@ -346,11 +347,12 @@
   }
 
   class ContentRight {
-    constructor () {
-      this.setup()
+    constructor (threadListAndBody) {
+      this.setup(threadListAndBody)
     }
 
-    setup () {
+    setup (threadListAndBody) {
+      this.threadListAndBody = threadListAndBody
       this.twopaneButton = document.querySelector('#kinspax-twopane-button')
       if (this.twopaneButton === null) {
         this.getElements()
@@ -390,14 +392,12 @@
         this.expandButton.click()
         this.expandButton.classList.remove('is-active')
         this.twopaneButton.classList.add('is-active')
-        this.contentBody.style.marginRight = '0px'
-        this.contentBody.style.borderRight = '0px'
+        this.threadListAndBody.changeRightPaneWidth(0)
         this.contentRight.style.display = 'none'
         chrome.storage.local.set({ twopane: true })
       } else {
         this.twopaneButton.classList.remove('is-active')
-        this.contentBody.style.marginRight = null
-        this.contentBody.style.borderRight = null
+        this.threadListAndBody.changeRightPaneWidth(null)
         this.contentRight.style.display = null
         chrome.storage.local.set({ twopane: false })
       }
@@ -540,9 +540,9 @@
           rightDraggable = new RightDraggableBar(threadListAndBody)
         }
         if (contentRight !== undefined) {
-          contentRight.setup()
+          contentRight.setup(threadListAndBody)
         } else {
-          contentRight = new ContentRight()
+          contentRight = new ContentRight(threadListAndBody)
         }
         if (filterThread !== undefined) {
           filterThread.setup(threadListAndBody)
