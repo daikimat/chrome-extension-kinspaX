@@ -34,6 +34,7 @@
     twopane: 'twopane'
   }
 
+  // TODO Separate classes into DomHolder and PanewidthChanger
   class ThredListAndBody {
     constructor () {
       this.changeWidthEventListners = []
