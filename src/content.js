@@ -30,27 +30,24 @@
 
   const storageKeys = {
     thredListWidth: 'thredListWidth',
+    rightPaneWidth: 'rightPaneWidth',
     twopane: 'twopane'
   }
 
+  // TODO Separate classes into DomHolder and PanewidthChanger
   class ThredListAndBody {
     constructor () {
-      this.changeWidtdhEventListners = []
+      this.changeWidthEventListners = []
       this.getElements()
-      if (this.contentLeft !== null && this.contentBody !== null) {
+      if (this.contentLeftPane !== null && this.contentRightPane !== null && this.contentBody !== null) {
         this.ready = true
-        this.addEventListener()
-        this.windowScrollEvent = throttle(() => {
-          (async () => {
-            await timer(50)
-            this.clickReadMoreIfDisplayed()
-          })()
-        }, 50)
-        window.addEventListener('scroll', this.windowScrollEvent)
         const that = this
-        chrome.storage.local.get([storageKeys.thredListWidth], (result) => {
+        chrome.storage.local.get([storageKeys.thredListWidth, storageKeys.rightPaneWidth], (result) => {
           if (result.thredListWidth !== undefined) {
-            that.changeWidth(result.thredListWidth)
+            that.changeLeftPaneWidth(result.thredListWidth)
+          }
+          if (result.rightPaneWidth !== undefined) {
+            that.changeRightPaneWidth(result.rightPaneWidth)
           }
         })
         return
@@ -58,16 +55,9 @@
       this.ready = false
     }
 
-    clickReadMoreIfDisplayed () {
-      const isDisplayReadMore = (this.readMore.offsetParent !== null && this.readMore.style.display !== 'none')
-      const isDisplayScrollPosition = (this.readMore.getBoundingClientRect().top - window.innerHeight) < 0
-      if (isDisplayReadMore && isDisplayScrollPosition && this.readMoreLoading !== true) {
-        this.readMore.click()
-      }
-    }
-
     getElements () {
-      this.contentLeft = document.querySelector('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-left')
+      this.contentLeftPane = document.querySelector('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-left')
+      this.contentRightPane = document.querySelector('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-right')
       this.threadListItemLink = document.querySelectorAll('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-item-link')
       this.threadList = []
       this.threadListItemLink.forEach(element => {
@@ -78,6 +68,71 @@
         })
       })
       this.contentBody = document.querySelector('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body')
+    }
+
+    changeLeftPaneWidth (width) {
+      // super heavy
+      if (this.ready === false) {
+        return
+      }
+      let widthWithPx = null
+      if (width !== null) {
+        widthWithPx = width + 'px'
+      }
+      this.contentLeftPane.style.width = widthWithPx
+      this.threadListItemLink.forEach(element => {
+        element.style.width = widthWithPx
+      })
+      this.contentBody.style.marginLeft = widthWithPx
+      chrome.storage.local.set({ thredListWidth: width })
+      this.changeWidthEventListners.forEach(listener => {
+        listener()
+      })
+    }
+
+    changeRightPaneWidth (width) {
+      // super heavy
+      if (this.ready === false) {
+        return
+      }
+      let widthWithPx = null
+      if (width !== null) {
+        widthWithPx = width + 'px'
+      }
+      this.contentRightPane.style.width = widthWithPx
+      this.contentBody.style.marginRight = widthWithPx
+      this.contentBody.style.borderRight = widthWithPx
+      chrome.storage.local.set({ rightPaneWidth: width })
+      this.changeWidthEventListners.forEach(listener => {
+        listener()
+      })
+    }
+
+    addChangeWidthEventListener (listner) {
+      this.changeWidthEventListners.push(listner)
+    }
+  }
+
+  class AutoClickReadmore {
+    constructor (thredListAndBody) {
+      this.setup(thredListAndBody)
+    }
+
+    setup (thredListAndBody) {
+      this.afterClickReadMoreEventListeners = []
+      this.threadListAndBody = thredListAndBody
+      this.getElements()
+      this.addEventListener()
+      this.windowScrollEvent = throttle(() => {
+        (async () => {
+          await timer(50)
+          this.clickReadMoreIfDisplayed()
+        })()
+      }, 50)
+      window.addEventListener('scroll', this.windowScrollEvent)
+    }
+
+    getElements () {
       const readMores = document.querySelectorAll('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore')
       this.readMore = readMores[readMores.length - 1]
     }
@@ -92,64 +147,36 @@
           await timer(250)
           this.getElements()
           this.addEventListener()
-          this.changeWidth(this.contentBody.offsetLeft)
+          this.threadListAndBody.getElements()
+          this.threadListAndBody.changeLeftPaneWidth(this.threadListAndBody.contentBody.offsetLeft)
           this.readMoreLoading = false
-          this.filter(this.filterdKeyword)
+          this.afterClickReadMoreEventListeners.forEach(listener => {
+            listener()
+          })
         })()
       })
     }
 
-    changeWidth (width) {
-      // super heavy
-      if (this.ready === false) {
-        return
+    clickReadMoreIfDisplayed () {
+      const isDisplayReadMore = (this.readMore.offsetParent !== null && this.readMore.style.display !== 'none')
+      const isDisplayScrollPosition = (this.readMore.getBoundingClientRect().top - window.innerHeight) < 0
+      if (isDisplayReadMore && isDisplayScrollPosition && this.readMoreLoading !== true) {
+        this.readMore.click()
       }
-      let widthWithPx = null
-      if (width !== null) {
-        widthWithPx = width + 'px'
-      }
-      this.contentLeft.style.width = widthWithPx
-      this.threadListItemLink.forEach(element => {
-        element.style.width = widthWithPx
-      })
-      this.contentBody.style.marginLeft = widthWithPx
-      chrome.storage.local.set({ thredListWidth: width })
-      this.changeWidtdhEventListners.forEach(listener => {
-        listener(width)
-      })
     }
 
-    filter (keyword) {
-      if (typeof keyword !== 'string') {
-        keyword = ''
-      }
-      this.filterdKeyword = keyword
-      this.threadList.forEach(thread => {
-        const item = thread.item
-        const link = thread.link
-        if (thread.title.includes(keyword)) {
-          item.style.display = null
-          link.innerHTML = thread.title.replace(keyword, `<mark>${keyword}</mark>`)
-        } else {
-          item.style.display = 'none'
-          link.innerHTML = thread.title
-        }
-      })
-      this.clickReadMoreIfDisplayed()
-    }
-
-    addChangeWidthEventListener (listner) {
-      this.changeWidtdhEventListners.push(listner)
+    addAfterClickReadMoreEventListener (listner) {
+      this.afterClickReadMoreEventListeners.push(listner)
     }
   }
 
-  class DraggableBar {
+  class LeftDraggableBar {
     constructor (threadListAndBody) {
       this.setup(threadListAndBody)
     }
 
     setup (threadListAndBody) {
-      this.draggableBar = document.querySelector('#kinspax-draggable-bar')
+      this.draggableBar = document.querySelector('#kinspax-draggable-bar-left')
       if (this.draggableBar === null) {
         this.threadListAndBody = threadListAndBody
         this.setupThreadlist()
@@ -157,7 +184,7 @@
           this.layout()
         })
         this.draggableBar = document.createElement('div')
-        this.draggableBar.id = 'kinspax-draggable-bar'
+        this.draggableBar.id = 'kinspax-draggable-bar-left'
         this.layout()
         this.setupMouseEvent()
         this.insertBar()
@@ -168,7 +195,7 @@
     }
 
     setupThreadlist () {
-      this.threadListAndBody.contentLeft.ondragstart = () => {
+      this.threadListAndBody.contentRightPane.ondragstart = () => {
         return false
       }
       this.threadListAndBody.contentBody.ondragstart = () => {
@@ -185,7 +212,7 @@
       }
       const onMouseUp = (event) => {
         if (event.pageX > 0) {
-          that.threadListAndBody.changeWidth(event.pageX)
+          that.threadListAndBody.changeLeftPaneWidth(event.pageX)
           that.draggableBar.style.left = event.pageX + 'px'
         }
       }
@@ -203,7 +230,7 @@
       }
 
       this.draggableBar.addEventListener('dblclick', () => {
-        that.threadListAndBody.changeWidth(null)
+        that.threadListAndBody.changeLeftPaneWidth(null)
       })
     }
 
@@ -228,16 +255,108 @@
     }
 
     insertBar () {
-      this.threadListAndBody.contentLeft.insertAdjacentElement('afterend', this.draggableBar)
+      this.threadListAndBody.contentLeftPane.insertAdjacentElement('afterend', this.draggableBar)
     }
   }
 
-  class ContentRight {
-    constructor () {
-      this.setup()
+  class RightDraggableBar {
+    constructor (threadListAndBody) {
+      this.setup(threadListAndBody)
     }
 
-    setup () {
+    setup (threadListAndBody) {
+      this.draggableBar = document.querySelector('#kinspax-draggable-bar-right')
+      if (this.draggableBar === null) {
+        this.threadListAndBody = threadListAndBody
+        this.setupThreadlist()
+        this.threadListAndBody.addChangeWidthEventListener(() => {
+          this.layout()
+        })
+        this.draggableBar = document.createElement('div')
+        this.draggableBar.id = 'kinspax-draggable-bar-right'
+        this.layout()
+        this.setupMouseEvent()
+        this.insertBar()
+      } else {
+        this.layout()
+        this.setupMouseEvent()
+      }
+    }
+
+    setupThreadlist () {
+      this.threadListAndBody.contentLeftPane.ondragstart = () => {
+        return false
+      }
+      this.threadListAndBody.contentBody.ondragstart = () => {
+        return false
+      }
+    }
+
+    setupMouseEvent () {
+      const that = this
+      const onMouseMove = (event) => {
+        if (event.pageX > 0) {
+          that.draggableBar.style.left = event.pageX + 'px'
+        }
+      }
+      const onMouseUp = (event) => {
+        if (event.pageX > 0) {
+          that.threadListAndBody.changeRightPaneWidth(document.body.scrollWidth - event.pageX)
+          that.draggableBar.style.left = event.pageX + 'px'
+        }
+      }
+      that.draggableBar.ondragstart = () => {
+        return false
+      }
+
+      that.draggableBar.onmousedown = () => {
+        document.addEventListener('mousemove', onMouseMove)
+        that.draggableBar.onmouseup = (event) => {
+          onMouseUp(event)
+          document.removeEventListener('mousemove', onMouseMove)
+          that.draggableBar.onmouseup = null
+        }
+      }
+
+      this.draggableBar.addEventListener('dblclick', () => {
+        that.threadListAndBody.changeRightPaneWidth(null)
+      })
+    }
+
+    layout () {
+      this.syncHeight()
+      this.syncXPosition()
+    }
+
+    syncHeight () {
+      const intervalId = setInterval(() => {
+        const spacebody = document.querySelector('.gaia-argoui-space-spacelayout-body')
+        const computedStyleHeight = parseInt(window.getComputedStyle(spacebody).getPropertyValue('height'), 10)
+        if (computedStyleHeight > 0) {
+          this.draggableBar.style.height = computedStyleHeight + 'px'
+          clearInterval(intervalId)
+        }
+      }, 600)
+    }
+
+    syncXPosition () {
+      this.draggableBar.style.left = this.threadListAndBody.contentBody.offsetLeft +
+        this.threadListAndBody.contentBody.offsetWidth +
+        'px'
+    }
+
+    insertBar () {
+      this.threadListAndBody.contentRightPane.insertAdjacentElement('afterend', this.draggableBar)
+    }
+  }
+
+  class PaneModeController {
+    constructor (threadListAndBody) {
+      this.setup(threadListAndBody)
+    }
+
+    setup (threadListAndBody) {
+      this.threadListAndBody = threadListAndBody
       this.twopaneButton = document.querySelector('#kinspax-twopane-button')
       if (this.twopaneButton === null) {
         this.getElements()
@@ -277,14 +396,12 @@
         this.expandButton.click()
         this.expandButton.classList.remove('is-active')
         this.twopaneButton.classList.add('is-active')
-        this.contentBody.style.marginRight = '0px'
-        this.contentBody.style.borderRight = '0px'
+        this.threadListAndBody.changeRightPaneWidth(0)
         this.contentRight.style.display = 'none'
         chrome.storage.local.set({ twopane: true })
       } else {
         this.twopaneButton.classList.remove('is-active')
-        this.contentBody.style.marginRight = null
-        this.contentBody.style.borderRight = null
+        this.threadListAndBody.changeRightPaneWidth(null)
         this.contentRight.style.display = null
         chrome.storage.local.set({ twopane: false })
       }
@@ -292,16 +409,22 @@
   }
 
   class FilterThread {
-    constructor (threadListAndBody) {
-      this.setup(threadListAndBody)
+    constructor (threadListAndBody, autoClickReadmore) {
+      this.setup(threadListAndBody, autoClickReadmore)
     }
 
-    setup (threadListAndBody) {
+    setup (threadListAndBody, autoClickReadmore) {
       this.searchBox = document.querySelector('#kinspax-serchbox')
       if (this.searchBox === null) {
         this.threadListAndBody = threadListAndBody
-        this.threadListAndBody.addChangeWidthEventListener((width) => {
-          this.layout(width)
+        this.threadListAndBody.addChangeWidthEventListener(() => {
+          if (this.threadListAndBody.ready === true) {
+            this.layout(this.threadListAndBody.contentLeftPane.style.width.replace('px', ''))
+          }
+        })
+        this.autoClickReadmore = autoClickReadmore
+        this.autoClickReadmore.addAfterClickReadMoreEventListener(() => {
+          this.filter(this.filterdKeyword)
         })
         this.createSearchBox()
         this.addEventListener()
@@ -323,7 +446,7 @@
     addEventListener () {
       this.serachInput.addEventListener('input', debounce((event) => {
         const keyword = event.srcElement.value
-        this.threadListAndBody.filter(keyword)
+        this.filter(keyword)
       }, 200))
 
       this.serachInput.addEventListener('keydown', throttle((event) => {
@@ -386,13 +509,13 @@
     }
 
     insertSearchInput () {
-      this.threadListAndBody.contentLeft.insertAdjacentElement('afterbegin', this.searchBox)
+      this.threadListAndBody.contentLeftPane.insertAdjacentElement('afterbegin', this.searchBox)
     }
 
     layout (width) {
       const paddingLeft = parseInt(window.getComputedStyle(this.serachInput).getPropertyValue('padding-left'), 10)
       const paddingRight = parseInt(window.getComputedStyle(this.serachInput).getPropertyValue('padding-right'), 10)
-      if (width !== null) {
+      if (width !== null && width > 0) {
         let newWidth = width - paddingLeft - paddingRight
         newWidth = newWidth > 0 ? newWidth : 0
         this.serachInput.style.width = newWidth + 'px'
@@ -400,10 +523,31 @@
         this.serachInput.style.width = null
       }
     }
+
+    filter (keyword) {
+      if (typeof keyword !== 'string') {
+        keyword = ''
+      }
+      this.filterdKeyword = keyword
+      this.threadListAndBody.threadList.forEach(thread => {
+        const item = thread.item
+        const link = thread.link
+        if (thread.title.includes(keyword)) {
+          item.style.display = null
+          link.innerHTML = thread.title.replace(keyword, `<mark>${keyword}</mark>`)
+        } else {
+          item.style.display = 'none'
+          link.innerHTML = thread.title
+        }
+      })
+      this.autoClickReadmore.clickReadMoreIfDisplayed()
+    }
   }
 
-  let draggable
-  let contentRight
+  let autoClickReadmore
+  let leftDraggable
+  let rightDraggable
+  let paneModeController
   let filterThread
   const setup = () => {
     const intervalId = setInterval(() => {
@@ -413,20 +557,30 @@
       }
       const threadListAndBody = new ThredListAndBody()
       if (threadListAndBody.ready === true) {
-        if (draggable !== undefined) {
-          draggable.setup(threadListAndBody)
+        if (autoClickReadmore !== undefined) {
+          autoClickReadmore.setup(threadListAndBody)
         } else {
-          draggable = new DraggableBar(threadListAndBody)
+          autoClickReadmore = new AutoClickReadmore(threadListAndBody)
         }
-        if (contentRight !== undefined) {
-          contentRight.setup()
+        if (leftDraggable !== undefined) {
+          leftDraggable.setup(threadListAndBody)
         } else {
-          contentRight = new ContentRight()
+          leftDraggable = new LeftDraggableBar(threadListAndBody)
+        }
+        if (rightDraggable !== undefined) {
+          rightDraggable.setup(threadListAndBody)
+        } else {
+          rightDraggable = new RightDraggableBar(threadListAndBody)
+        }
+        if (paneModeController !== undefined) {
+          paneModeController.setup(threadListAndBody)
+        } else {
+          paneModeController = new PaneModeController(threadListAndBody)
         }
         if (filterThread !== undefined) {
-          filterThread.setup(threadListAndBody)
+          filterThread.setup(threadListAndBody, autoClickReadmore)
         } else {
-          filterThread = new FilterThread(threadListAndBody)
+          filterThread = new FilterThread(threadListAndBody, autoClickReadmore)
         }
         clearInterval(intervalId)
       }

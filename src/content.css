@@ -1,4 +1,5 @@
-#kinspax-draggable-bar {
+#kinspax-draggable-bar-left,
+#kinspax-draggable-bar-right {
   width: 8px;
   cursor: col-resize;
   margin-left: -4px;
@@ -8,11 +9,13 @@
   z-index: 9;
 }
 
-#kinspax-draggable-bar:hover {
+#kinspax-draggable-bar-left:hover,
+#kinspax-draggable-bar-right:hover {
   opacity: 0.3;
 }
 
-.gaia-argoui-space-spacecontent.collapsed #kinspax-draggable-bar {
+.gaia-argoui-space-spacecontent.collapsed #kinspax-draggable-bar-left,
+.gaia-argoui-space-spacecontent.collapsed #kinspax-draggable-bar-right {
   display: none;
 }
 
