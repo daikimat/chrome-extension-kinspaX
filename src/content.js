@@ -515,7 +515,7 @@
     layout (width) {
       const paddingLeft = parseInt(window.getComputedStyle(this.serachInput).getPropertyValue('padding-left'), 10)
       const paddingRight = parseInt(window.getComputedStyle(this.serachInput).getPropertyValue('padding-right'), 10)
-      if (width !== null) {
+      if (width !== null && width > 0) {
         let newWidth = width - paddingLeft - paddingRight
         newWidth = newWidth > 0 ? newWidth : 0
         this.serachInput.style.width = newWidth + 'px'
