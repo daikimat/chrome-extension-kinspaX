@@ -40,14 +40,6 @@
       this.getElements()
       if (this.contentLeftPane !== null && this.contentRightPane !== null && this.contentBody !== null) {
         this.ready = true
-        this.addEventListener()
-        this.windowScrollEvent = throttle(() => {
-          (async () => {
-            await timer(50)
-            this.clickReadMoreIfDisplayed()
-          })()
-        }, 50)
-        window.addEventListener('scroll', this.windowScrollEvent)
         const that = this
         chrome.storage.local.get([storageKeys.thredListWidth, storageKeys.rightPaneWidth], (result) => {
           if (result.thredListWidth !== undefined) {
@@ -60,14 +52,6 @@
         return
       }
       this.ready = false
-    }
-
-    clickReadMoreIfDisplayed () {
-      const isDisplayReadMore = (this.readMore.offsetParent !== null && this.readMore.style.display !== 'none')
-      const isDisplayScrollPosition = (this.readMore.getBoundingClientRect().top - window.innerHeight) < 0
-      if (isDisplayReadMore && isDisplayScrollPosition && this.readMoreLoading !== true) {
-        this.readMore.click()
-      }
     }
 
     getElements () {
@@ -83,25 +67,6 @@
         })
       })
       this.contentBody = document.querySelector('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-body')
-      const readMores = document.querySelectorAll('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore')
-      this.readMore = readMores[readMores.length - 1]
-    }
-
-    addEventListener () {
-      this.readMore.addEventListener('click', () => {
-        if (this.readMoreLoading) {
-          return
-        }
-        this.readMoreLoading = true;
-        (async () => {
-          await timer(250)
-          this.getElements()
-          this.addEventListener()
-          this.changeLeftPaneWidth(this.contentBody.offsetLeft)
-          this.readMoreLoading = false
-          this.filter(this.filterdKeyword)
-        })()
-      })
     }
 
     changeLeftPaneWidth (width) {
@@ -142,27 +107,65 @@
       })
     }
 
-    filter (keyword) {
-      if (typeof keyword !== 'string') {
-        keyword = ''
-      }
-      this.filterdKeyword = keyword
-      this.threadList.forEach(thread => {
-        const item = thread.item
-        const link = thread.link
-        if (thread.title.includes(keyword)) {
-          item.style.display = null
-          link.innerHTML = thread.title.replace(keyword, `<mark>${keyword}</mark>`)
-        } else {
-          item.style.display = 'none'
-          link.innerHTML = thread.title
-        }
-      })
-      this.clickReadMoreIfDisplayed()
-    }
-
     addChangeWidthEventListener (listner) {
       this.changeWidthEventListners.push(listner)
+    }
+  }
+
+  class AutoClickReadmore {
+    constructor (thredListAndBody) {
+      this.setup(thredListAndBody)
+    }
+
+    setup (thredListAndBody) {
+      this.afterClickReadMoreEventListeners = []
+      this.threadListAndBody = thredListAndBody
+      this.getElements()
+      this.addEventListener()
+      this.windowScrollEvent = throttle(() => {
+        (async () => {
+          await timer(50)
+          this.clickReadMoreIfDisplayed()
+        })()
+      }, 50)
+      window.addEventListener('scroll', this.windowScrollEvent)
+    }
+
+    getElements () {
+      const readMores = document.querySelectorAll('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-readmore')
+      this.readMore = readMores[readMores.length - 1]
+    }
+
+    addEventListener () {
+      this.readMore.addEventListener('click', () => {
+        if (this.readMoreLoading) {
+          return
+        }
+        this.readMoreLoading = true;
+        (async () => {
+          await timer(250)
+          this.getElements()
+          this.addEventListener()
+          this.threadListAndBody.getElements()
+          this.threadListAndBody.changeLeftPaneWidth(this.threadListAndBody.contentBody.offsetLeft)
+          this.readMoreLoading = false
+          this.afterClickReadMoreEventListeners.forEach(listener => {
+            listener()
+          })
+        })()
+      })
+    }
+
+    clickReadMoreIfDisplayed () {
+      const isDisplayReadMore = (this.readMore.offsetParent !== null && this.readMore.style.display !== 'none')
+      const isDisplayScrollPosition = (this.readMore.getBoundingClientRect().top - window.innerHeight) < 0
+      if (isDisplayReadMore && isDisplayScrollPosition && this.readMoreLoading !== true) {
+        this.readMore.click()
+      }
+    }
+
+    addAfterClickReadMoreEventListener (listner) {
+      this.afterClickReadMoreEventListeners.push(listner)
     }
   }
 
@@ -405,11 +408,11 @@
   }
 
   class FilterThread {
-    constructor (threadListAndBody) {
-      this.setup(threadListAndBody)
+    constructor (threadListAndBody, autoClickReadmore) {
+      this.setup(threadListAndBody, autoClickReadmore)
     }
 
-    setup (threadListAndBody) {
+    setup (threadListAndBody, autoClickReadmore) {
       this.searchBox = document.querySelector('#kinspax-serchbox')
       if (this.searchBox === null) {
         this.threadListAndBody = threadListAndBody
@@ -417,6 +420,10 @@
           if (this.threadListAndBody.ready === true) {
             this.layout(this.threadListAndBody.contentLeftPane.style.width.replace('px', ''))
           }
+        })
+        this.autoClickReadmore = autoClickReadmore
+        this.autoClickReadmore.addAfterClickReadMoreEventListener(() => {
+          this.filter(this.filterdKeyword)
         })
         this.createSearchBox()
         this.addEventListener()
@@ -438,7 +445,7 @@
     addEventListener () {
       this.serachInput.addEventListener('input', debounce((event) => {
         const keyword = event.srcElement.value
-        this.threadListAndBody.filter(keyword)
+        this.filter(keyword)
       }, 200))
 
       this.serachInput.addEventListener('keydown', throttle((event) => {
@@ -515,8 +522,28 @@
         this.serachInput.style.width = null
       }
     }
+
+    filter (keyword) {
+      if (typeof keyword !== 'string') {
+        keyword = ''
+      }
+      this.filterdKeyword = keyword
+      this.threadListAndBody.threadList.forEach(thread => {
+        const item = thread.item
+        const link = thread.link
+        if (thread.title.includes(keyword)) {
+          item.style.display = null
+          link.innerHTML = thread.title.replace(keyword, `<mark>${keyword}</mark>`)
+        } else {
+          item.style.display = 'none'
+          link.innerHTML = thread.title
+        }
+      })
+      this.autoClickReadmore.clickReadMoreIfDisplayed()
+    }
   }
 
+  let autoClickReadmore
   let leftDraggable
   let rightDraggable
   let paneModeController
@@ -529,6 +556,11 @@
       }
       const threadListAndBody = new ThredListAndBody()
       if (threadListAndBody.ready === true) {
+        if (autoClickReadmore !== undefined) {
+          autoClickReadmore.setup(threadListAndBody)
+        } else {
+          autoClickReadmore = new AutoClickReadmore(threadListAndBody)
+        }
         if (leftDraggable !== undefined) {
           leftDraggable.setup(threadListAndBody)
         } else {
@@ -545,9 +577,9 @@
           paneModeController = new PaneModeController(threadListAndBody)
         }
         if (filterThread !== undefined) {
-          filterThread.setup(threadListAndBody)
+          filterThread.setup(threadListAndBody, autoClickReadmore)
         } else {
-          filterThread = new FilterThread(threadListAndBody)
+          filterThread = new FilterThread(threadListAndBody, autoClickReadmore)
         }
         clearInterval(intervalId)
       }
