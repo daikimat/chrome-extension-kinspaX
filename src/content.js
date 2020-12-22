@@ -352,12 +352,18 @@
   }
 
   class PaneModeController {
-    constructor (threadListAndBody) {
-      this.setup(threadListAndBody)
+    constructor (threadListAndBody, leftDraggableBar, rightDraggableBar) {
+      this.setup(threadListAndBody, leftDraggableBar, rightDraggableBar)
     }
 
-    setup (threadListAndBody) {
+    setup (threadListAndBody, leftDraggableBar, rightDraggableBar) {
       this.threadListAndBody = threadListAndBody
+      this.leftDraggableBar = leftDraggableBar
+      this.rightDraggableBar = rightDraggableBar
+      this.debounceReLayoutDraggableBar = debounce(() => {
+        this.leftDraggableBar.layout()
+        this.rightDraggableBar.layout()
+      }, 100)
       this.twopaneButton = document.querySelector('#kinspax-twopane-button')
       if (this.twopaneButton === null) {
         this.getElements()
@@ -406,6 +412,7 @@
         this.contentRight.style.display = null
         chrome.storage.local.set({ twopane: false })
       }
+      this.debounceReLayoutDraggableBar()
     }
   }
 
@@ -574,9 +581,9 @@
           rightDraggable = new RightDraggableBar(threadListAndBody)
         }
         if (paneModeController !== undefined) {
-          paneModeController.setup(threadListAndBody)
+          paneModeController.setup(threadListAndBody, leftDraggable, rightDraggable)
         } else {
-          paneModeController = new PaneModeController(threadListAndBody)
+          paneModeController = new PaneModeController(threadListAndBody, leftDraggable, rightDraggable)
         }
         if (filterThread !== undefined) {
           filterThread.setup(threadListAndBody, autoClickReadmore)
