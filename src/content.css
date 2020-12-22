@@ -15,12 +15,21 @@
 }
 
 .gaia-argoui-space-spacecontent.collapsed #kinspax-draggable-bar-left,
-.gaia-argoui-space-spacecontent.collapsed #kinspax-draggable-bar-right {
+.gaia-argoui-space-spacecontent.collapsed #kinspax-draggable-bar-right,
+.gaia-argoui-space-spacecontent.two-pane #kinspax-draggable-bar-right {
   display: none;
 }
 
+.gaia-argoui-space-spacecontent.two-pane .gaia-argoui-space-spacecontent-body {
+  margin-right: 0 !important;
+  border-right: 0 !important;
+}
+
 .gaia-argoui-space-spacecontent.collapsed.three-pane .gaia-argoui-space-spacecontent-body {
+  margin-right: 0 !important;
+  border-right: 0 !important;
   margin-left: 0 !important;
+  border-left: 0 !important;
 }
 
 #kinspax-twopane-button {

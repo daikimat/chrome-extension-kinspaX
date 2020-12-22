@@ -56,6 +56,7 @@
     }
 
     getElements () {
+      this.content = document.querySelector('.gaia-argoui-space-spacecontent.three-pane')
       this.contentLeftPane = document.querySelector('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-left')
       this.contentRightPane = document.querySelector('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-spacecontent-right')
       this.threadListItemLink = document.querySelectorAll('.gaia-argoui-space-spacecontent.three-pane .gaia-argoui-space-threadlist-item-link')
@@ -351,12 +352,18 @@
   }
 
   class PaneModeController {
-    constructor (threadListAndBody) {
-      this.setup(threadListAndBody)
+    constructor (threadListAndBody, leftDraggableBar, rightDraggableBar) {
+      this.setup(threadListAndBody, leftDraggableBar, rightDraggableBar)
     }
 
-    setup (threadListAndBody) {
+    setup (threadListAndBody, leftDraggableBar, rightDraggableBar) {
       this.threadListAndBody = threadListAndBody
+      this.leftDraggableBar = leftDraggableBar
+      this.rightDraggableBar = rightDraggableBar
+      this.debounceReLayoutDraggableBar = debounce(() => {
+        this.leftDraggableBar.layout()
+        this.rightDraggableBar.layout()
+      }, 100)
       this.twopaneButton = document.querySelector('#kinspax-twopane-button')
       if (this.twopaneButton === null) {
         this.getElements()
@@ -396,15 +403,16 @@
         this.expandButton.click()
         this.expandButton.classList.remove('is-active')
         this.twopaneButton.classList.add('is-active')
-        this.threadListAndBody.changeRightPaneWidth(0)
+        this.threadListAndBody.content.classList.add('two-pane')
         this.contentRight.style.display = 'none'
         chrome.storage.local.set({ twopane: true })
       } else {
         this.twopaneButton.classList.remove('is-active')
-        this.threadListAndBody.changeRightPaneWidth(null)
+        this.threadListAndBody.content.classList.remove('two-pane')
         this.contentRight.style.display = null
         chrome.storage.local.set({ twopane: false })
       }
+      this.debounceReLayoutDraggableBar()
     }
   }
 
@@ -573,9 +581,9 @@
           rightDraggable = new RightDraggableBar(threadListAndBody)
         }
         if (paneModeController !== undefined) {
-          paneModeController.setup(threadListAndBody)
+          paneModeController.setup(threadListAndBody, leftDraggable, rightDraggable)
         } else {
-          paneModeController = new PaneModeController(threadListAndBody)
+          paneModeController = new PaneModeController(threadListAndBody, leftDraggable, rightDraggable)
         }
         if (filterThread !== undefined) {
           filterThread.setup(threadListAndBody, autoClickReadmore)
