@@ -264,6 +264,7 @@
 
   class RightDraggableBar {
     constructor (threadListAndBody) {
+      this.barWidth = 8
       this.setup(threadListAndBody)
     }
 
@@ -299,13 +300,15 @@
       const that = this
       const onMouseMove = (event) => {
         if (event.pageX > 0) {
-          that.draggableBar.style.left = event.pageX + 'px'
+          const rightWidth = document.body.scrollWidth - event.pageX
+          that.draggableBar.style.right = rightWidth - (that.barWidth / 2) + 'px'
         }
       }
       const onMouseUp = (event) => {
         if (event.pageX > 0) {
-          that.threadListAndBody.changeRightPaneWidth(document.body.scrollWidth - event.pageX)
-          that.draggableBar.style.left = event.pageX + 'px'
+          const rightWidth = document.body.scrollWidth - event.pageX
+          that.threadListAndBody.changeRightPaneWidth(rightWidth)
+          that.draggableBar.style.right = rightWidth - (that.barWidth / 2) + 'px'
         }
       }
       that.draggableBar.ondragstart = () => {
@@ -343,9 +346,7 @@
     }
 
     syncXPosition () {
-      this.draggableBar.style.left = this.threadListAndBody.contentBody.offsetLeft +
-        this.threadListAndBody.contentBody.offsetWidth +
-        'px'
+      this.draggableBar.style.right = this.threadListAndBody.contentRightPane.offsetWidth - (this.barWidth / 2) + 'px'
     }
 
     insertBar () {
