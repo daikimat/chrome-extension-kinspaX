@@ -595,7 +595,7 @@
         }
         clearInterval(intervalId)
       }
-    }, 1000)
+    }, 1001)
   }
   setup()
   window.onhashchange = () => {
