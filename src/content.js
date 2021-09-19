@@ -84,7 +84,6 @@
       this.threadListItemLink.forEach(element => {
         element.style.width = widthWithPx
       })
-      this.contentBody.style.marginLeft = widthWithPx
       chrome.storage.local.set({ thredListWidth: width })
       this.changeWidthEventListners.forEach(listener => {
         listener()
