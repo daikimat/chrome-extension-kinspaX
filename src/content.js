@@ -102,7 +102,6 @@
         rightPaneWidthWithPx = (width - 1) + 'px'
       }
       this.contentRightPane.style.width = rightPaneWidthWithPx
-      this.contentBody.style.marginRight = widthWithPx
       this.contentBody.style.borderRight = widthWithPx
       chrome.storage.local.set({ rightPaneWidth: width })
       this.changeWidthEventListners.forEach(listener => {
