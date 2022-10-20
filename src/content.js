@@ -404,12 +404,12 @@
         this.expandButton.click()
         this.expandButton.classList.remove('is-active')
         this.twopaneButton.classList.add('is-active')
-        this.threadListAndBody.content.classList.add('two-pane')
+        this.threadListAndBody.content.classList.add('kinspax-two-pane')
         this.contentRight.style.display = 'none'
         chrome.storage.local.set({ twopane: true })
       } else {
         this.twopaneButton.classList.remove('is-active')
-        this.threadListAndBody.content.classList.remove('two-pane')
+        this.threadListAndBody.content.classList.remove('kinspax-two-pane')
         this.contentRight.style.display = null
         chrome.storage.local.set({ twopane: false })
       }

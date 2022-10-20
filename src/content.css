@@ -16,15 +16,15 @@
 
 .gaia-argoui-space-spacecontent.collapsed #kinspax-draggable-bar-left,
 .gaia-argoui-space-spacecontent.collapsed #kinspax-draggable-bar-right,
-.gaia-argoui-space-spacecontent.two-pane #kinspax-draggable-bar-right {
+.gaia-argoui-space-spacecontent.kinspax-two-pane #kinspax-draggable-bar-right {
   display: none;
 }
 
-.gaia-argoui-space-spacecontent.two-pane .gaia-argoui-space-spacecontent-left {
+.gaia-argoui-space-spacecontent.kinspax-two-pane .gaia-argoui-space-spacecontent-left {
   display: block !important;
 }
 
-.gaia-argoui-space-spacecontent.two-pane .gaia-argoui-space-spacecontent-body {
+.gaia-argoui-space-spacecontent.kinspax-two-pane .gaia-argoui-space-spacecontent-body {
   margin-right: 0 !important;
   border-right: 0 !important;
 }
