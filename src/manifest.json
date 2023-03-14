@@ -1,8 +1,8 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "__MSG_extName__",
   "description": "__MSG_extDescription__",
-  "version": "2.8",
+  "version": "2.9",
   "default_locale": "en",
   "homepage_url": "https://github.com/daikimat/chrome-extension-kinspaX",
   "icons": {
@@ -24,10 +24,20 @@
       "js": ["content.js"]
     }
   ],
-  "web_accessible_resources": [
-    "images/twopane-active.png",
-    "images/twopane.png"
-  ],
+  "web_accessible_resources": [{
+    "resources": [
+      "images/twopane-active.png",
+      "images/twopane.png"
+    ],
+    "matches": [
+      "https://*.cybozu.com/*",
+      "https://*.cybozu-dev.com/*",
+      "https://*.kintone.com/*",
+      "https://*.kintone-dev.com/*",
+      "https://*.cybozu.cn/*",
+      "https://*.cybozu-dev.cn/*"
+    ]
+  }],
   "permissions": [
     "storage"
   ]

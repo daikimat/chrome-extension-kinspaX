@@ -541,9 +541,13 @@
       this.threadListAndBody.threadList.forEach(thread => {
         const item = thread.item
         const link = thread.link
-        if (thread.title.includes(keyword)) {
+        const matchIndex = thread.title.toLowerCase().indexOf(keyword.toLowerCase())
+        if (matchIndex > 0 || keyword === '') {
           item.style.display = null
-          link.innerHTML = thread.title.replace(keyword, `<mark>${keyword}</mark>`)
+          const beforeMatch = thread.title.slice(0, matchIndex)
+          const match = thread.title.slice(matchIndex, matchIndex + keyword.length)
+          const afterMatch = thread.title.slice(matchIndex + keyword.length, matchIndex + keyword.length + thread.title.length)
+          link.innerHTML = beforeMatch + `<mark>${match}</mark>` + afterMatch
         } else {
           item.style.display = 'none'
           link.innerHTML = thread.title
