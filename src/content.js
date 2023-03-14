@@ -542,7 +542,7 @@
         const item = thread.item
         const link = thread.link
         const matchIndex = thread.title.toLowerCase().indexOf(keyword.toLowerCase())
-        if (matchIndex > 0 || keyword === '') {
+        if (matchIndex >= 0 || keyword === '') {
           item.style.display = null
           const beforeMatch = thread.title.slice(0, matchIndex)
           const match = thread.title.slice(matchIndex, matchIndex + keyword.length)
